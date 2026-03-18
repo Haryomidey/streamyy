@@ -4,9 +4,10 @@ export interface VideoTileProps {
   stream: MediaStream | null;
   muted?: boolean;
   label: string;
+  mirrored?: boolean;
 }
 
-export const VideoTile = ({ stream, muted = false, label }: VideoTileProps) => {
+export const VideoTile = ({ stream, muted = false, label, mirrored = false }: VideoTileProps) => {
   const ref = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export const VideoTile = ({ stream, muted = false, label }: VideoTileProps) => {
           background: "#111827",
           borderRadius: "1rem",
           objectFit: "cover",
+          transform: mirrored ? "scaleX(-1)" : "none",
         }}
       />
       <figcaption>{label}</figcaption>

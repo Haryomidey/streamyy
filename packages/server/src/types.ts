@@ -1,4 +1,5 @@
 import type { Server as HttpServer } from "node:http";
+import type { ServerOptions as SocketIoServerOptions } from "socket.io";
 import type {
   StreammyAuthHandler,
   StreammyNotifier,
@@ -36,6 +37,11 @@ export interface StreammySocketServerOptions {
   io: SocketIoLikeServer;
   service: StreammyService;
   auth?: StreammyAuthHandler;
+}
+
+export interface CreateManagedSocketServerOptions {
+  httpServer: HttpServer;
+  socket?: Partial<SocketIoServerOptions>;
 }
 
 export interface StreammyServerRuntimeOptions {
