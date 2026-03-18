@@ -1,0 +1,36 @@
+{
+  "name": "@streammy/server",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@streammy/core": "file:../core",
+    "socket.io": "^4.8.1"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "express": "^4.21.2",
+    "fastify": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@nestjs/common": {
+      "optional": true
+    },
+    "express": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    }
+  }
+}
