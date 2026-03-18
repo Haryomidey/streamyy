@@ -4,6 +4,24 @@
       "path": "./packages/core"
     },
     {
+      "path": "./packages/mongoose"
+    },
+    {
+      "path": "./packages/prisma"
+    },
+    {
+      "path": "./packages/postgres"
+    },
+    {
+      "path": "./packages/redis"
+    },
+    {
+      "path": "./packages/supabase"
+    },
+    {
+      "path": "./packages/dynamodb"
+    },
+    {
       "path": "./packages/server"
     },
     {

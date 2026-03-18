@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CallSession {
+  callId      String   @id
+  callerId    String
+  receiverId  String
+  callType    String
+  status      String
+  startedAt   DateTime?
+  endedAt     DateTime?
+  duration    Int?
+  endedBy     String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([callerId, createdAt(sort: Desc)])
+  @@index([receiverId, createdAt(sort: Desc)])
+  @@index([status, updatedAt(sort: Desc)])
+}
+
+model UserPresence {
+  userId            String   @id
+  status            String
+  lastSeenAt        DateTime
+  metadata          Json?
+  activeConnections Int
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([status, lastSeenAt(sort: Desc)])
+}
+
+model SocketConnection {
+  connectionId String   @id
+  userId       String
+  deviceId     String
+  connectedAt  DateTime
+  lastSeenAt   DateTime
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, deviceId])
+  @@index([userId, lastSeenAt(sort: Desc)])
+}

@@ -33,6 +33,16 @@ export interface StreammyNotifier {
   leaveUserRoom?(connectionId: string, userId: string): Promise<void>;
 }
 
+export interface StreammyPersistenceAdapter {
+  sessions: CallSessionRepository;
+  presence: UserPresenceRepository;
+  connections: SocketConnectionRepository;
+}
+
+export const defineStreammyPersistenceAdapter = (
+  adapter: StreammyPersistenceAdapter,
+): StreammyPersistenceAdapter => adapter;
+
 export interface StreammyAuthResult {
   userId: string;
   deviceId: string;

@@ -1,5 +1,5 @@
 import { Schema, type HydratedDocument, type Model, type Mongoose } from "mongoose";
-import type { PresenceRecord } from "../domain/call.js";
+import type { PresenceRecord } from "@streammy/core";
 
 export type UserPresenceDocument = HydratedDocument<PresenceRecord>;
 

@@ -3,7 +3,7 @@ import {
   STREAMMY_CALL_STATUSES,
   STREAMMY_CALL_TYPES,
   type CallSessionRecord,
-} from "../domain/call.js";
+} from "@streammy/core";
 
 export type CallSessionDocument = HydratedDocument<CallSessionRecord>;
 

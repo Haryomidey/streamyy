@@ -1,23 +1,20 @@
 import {
-  createStreammyModels,
+  createInMemoryPersistenceAdapter,
   createStreammyService,
-  MongooseCallSessionRepository,
-  MongooseSocketConnectionRepository,
-  MongooseUserPresenceRepository,
   type StreammyAuthHandler,
+  type StreammyPersistenceAdapter,
   type StreammyService,
 } from "@streammy/core";
-import type { Mongoose } from "mongoose";
 import { Server as SocketIoServer, type ServerOptions as SocketIoServerOptions } from "socket.io";
 import { SocketIoNotifier, bindSocketIoServer } from "./transport/socket-io.js";
 import type { SocketIoLikeServer } from "./types.js";
 
 export interface CreateStreammyRuntimeOptions {
-  mongoose: Mongoose;
   httpServer: import("node:http").Server;
   auth?: StreammyAuthHandler;
   ringingTimeoutMs?: number;
   socket?: Partial<SocketIoServerOptions>;
+  persistence?: StreammyPersistenceAdapter;
 }
 
 export interface StreammyRuntime {
@@ -29,12 +26,12 @@ export interface StreammyRuntime {
 
 export const createStreammyRuntime = (options: CreateStreammyRuntimeOptions): StreammyRuntime => {
   const io = new SocketIoServer(options.httpServer, options.socket ?? {}) as unknown as SocketIoLikeServer;
-  const models = createStreammyModels(options.mongoose);
   const notifier = new SocketIoNotifier(io);
+  const persistence = options.persistence ?? createInMemoryPersistenceAdapter();
   const service = createStreammyService({
-    sessions: new MongooseCallSessionRepository(models.CallSession),
-    presence: new MongooseUserPresenceRepository(models.UserPresence),
-    connections: new MongooseSocketConnectionRepository(models.SocketConnection),
+    sessions: persistence.sessions,
+    presence: persistence.presence,
+    connections: persistence.connections,
     notifier,
     ringingTimeoutMs: options.ringingTimeoutMs,
   });

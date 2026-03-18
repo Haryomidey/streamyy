@@ -15,6 +15,7 @@ Important:
 - Streamyy handles signaling, call state, presence, and socket orchestration
 - Streamyy does not process audio or video media on the server
 - media still flows peer-to-peer through WebRTC
+- persistence is adapter-based, so storage is not tied to MongoDB
 
 ## Packages
 
@@ -25,8 +26,86 @@ Shared internal/backend package for:
 - call session types
 - call statuses
 - repositories
-- Mongoose models
+- persistence adapters
 - service lifecycle logic
+
+### `@streammy/mongoose`
+
+Optional MongoDB/Mongoose adapter package for:
+
+- Mongoose models
+- Mongoose repositories
+- `createMongoosePersistenceAdapter(...)`
+
+### `@streammy/prisma`
+
+Optional Prisma adapter package for:
+
+- Prisma-backed repositories
+- `createPrismaPersistenceAdapter(...)`
+
+### `@streammy/postgres`
+
+Optional PostgreSQL adapter package for:
+
+- SQL-backed repositories
+- `createPostgresPersistenceAdapter(...)`
+
+### `@streammy/redis`
+
+Optional Redis adapter package for:
+
+- lightweight ephemeral state
+- fast presence and connection tracking
+- `createRedisPersistenceAdapter(...)`
+
+### `@streammy/supabase`
+
+Optional Supabase adapter package for:
+
+- Supabase table-backed repositories
+- `createSupabasePersistenceAdapter(...)`
+
+### `@streammy/dynamodb`
+
+Optional DynamoDB adapter package for:
+
+- DynamoDB-backed repositories
+- `createDynamoDbPersistenceAdapter(...)`
+
+## Supported Persistence Modes
+
+Right now Streamyy supports:
+
+- in-memory storage out of the box
+- MongoDB through `@streammy/mongoose`
+- Prisma through `@streammy/prisma`
+- PostgreSQL through `@streammy/postgres`
+- Redis through `@streammy/redis`
+- Supabase through `@streammy/supabase`
+- DynamoDB through `@streammy/dynamodb`
+- custom adapters through the repository interfaces in `@streammy/core`
+
+That means you can support:
+
+- Prisma
+- PostgreSQL
+- MySQL
+- Redis
+- Supabase
+- DynamoDB
+- your own custom persistence layer
+
+Official adapter packages in this workspace:
+
+- `@streammy/mongoose`
+- `@streammy/prisma`
+- `@streammy/postgres`
+- `@streammy/redis`
+- `@streammy/supabase`
+- `@streammy/dynamodb`
+
+Each adapter package now includes its own README and, where relevant, ready-to-copy schema examples.
 
 ### `@streammy/server`
 
@@ -35,11 +114,12 @@ Backend package developers install.
 Use it when you want:
 
 - Socket.IO signaling transport
-- Mongoose-backed runtime bootstrap
+- runtime bootstrap
 - Express integration
 - Fastify integration
 - Nest-style module integration
 - 60-second ringing timeout by default
+- persistence-agnostic backend setup
 
 ### `streammy`
 
@@ -61,7 +141,7 @@ Use it when you want:
 Install:
 
 ```bash
-npm install @streammy/server mongoose
+npm install @streammy/server
 ```
 
 What they get:
@@ -97,12 +177,9 @@ What they get:
 This is the main backend entry point.
 
 ```ts
-import mongoose from "mongoose";
 import { createServer } from "node:http";
 import express from "express";
 import { createStreammyServer, registerExpressStreammyRoutes } from "@streammy/server";
-
-await mongoose.connect(process.env.MONGODB_URI!);
 
 const app = express();
 app.use(express.json());
@@ -110,7 +187,6 @@ app.use(express.json());
 const httpServer = createServer(app);
 
 const streammy = createStreammyServer({
-  mongoose,
   httpServer,
   ringingTimeoutMs: 60_000,
   socket: {
@@ -146,13 +222,258 @@ httpServer.listen(4000);
 
 What this does:
 
-- creates Mongoose-backed repositories
 - creates the call service
 - creates the Socket.IO server internally
 - binds Socket.IO events internally
 - handles authentication
 - enables ringing timeout
 - exposes optional HTTP routes
+- uses in-memory storage by default unless you pass a persistence adapter
+
+## 1a. Use MongoDB/Mongoose if you want persistent storage
+
+If you want call history, presence persistence, and socket connection persistence across restarts, pass a Mongoose adapter.
+
+```ts
+import mongoose from "mongoose";
+import { createServer } from "node:http";
+import express from "express";
+import { createMongoosePersistenceAdapter } from "@streammy/mongoose";
+import { createStreammyServer } from "@streammy/server";
+
+await mongoose.connect(process.env.MONGODB_URI!);
+
+const app = express();
+const httpServer = createServer(app);
+
+const streammy = createStreammyServer({
+  httpServer,
+  persistence: createMongoosePersistenceAdapter(mongoose),
+});
+```
+
+This means:
+
+- `@streammy/server` is storage-agnostic
+- Mongoose is optional
+- you can later add other adapters like Prisma, PostgreSQL, Redis, or your own custom repositories
+
+Install for this option:
+
+```bash
+npm install @streammy/server @streammy/mongoose mongoose
+```
+
+## 1b. Use your own persistence adapter
+
+If your app uses another database, implement the repository interfaces from `@streammy/core` and pass them into the server runtime.
+
+```ts
+import {
+  defineStreammyPersistenceAdapter,
+  type CallSessionRepository,
+  type SocketConnectionRepository,
+  type UserPresenceRepository,
+} from "@streammy/core";
+import { createStreammyServer } from "@streammy/server";
+
+const sessions: CallSessionRepository = {
+  async create(session) {
+    return session;
+  },
+  async findByCallId(callId) {
+    return null;
+  },
+  async update(callId, update) {
+    return null;
+  },
+};
+
+const presence: UserPresenceRepository = {
+  async upsert(record) {
+    return record;
+  },
+  async findByUserId(userId) {
+    return null;
+  },
+};
+
+const connections: SocketConnectionRepository = {
+  async upsert(record) {
+    return record;
+  },
+  async deleteByConnectionId(connectionId) {
+    return null;
+  },
+  async findByConnectionId(connectionId) {
+    return null;
+  },
+  async findByUserId(userId) {
+    return [];
+  },
+  async countByUserId(userId) {
+    return 0;
+  },
+};
+
+const persistence = defineStreammyPersistenceAdapter({
+  sessions,
+  presence,
+  connections,
+});
+
+const streammy = createStreammyServer({
+  httpServer,
+  persistence,
+});
+```
+
+What this gives you:
+
+- Streamyy server logic stays the same
+- only the storage adapter changes
+- backend teams can keep using their existing database stack
+
+## Example adapter ideas
+
+### Prisma / PostgreSQL
+
+Create:
+
+- `PrismaCallSessionRepository`
+- `PrismaUserPresenceRepository`
+- `PrismaSocketConnectionRepository`
+
+Then pass them as:
+
+```ts
+const persistence = defineStreammyPersistenceAdapter({
+  sessions: new PrismaCallSessionRepository(prisma),
+  presence: new PrismaUserPresenceRepository(prisma),
+  connections: new PrismaSocketConnectionRepository(prisma),
+});
+```
+
+### Redis
+
+For lightweight ephemeral calling state, you can also implement repositories backed by Redis.
+
+That can be useful when:
+
+- you care more about speed than long-term history
+- you want fast presence and socket tracking
+- you want short-lived call session state
+
+## Official adapter package examples
+
+### Prisma
+
+Install:
+
+```bash
+npm install @streammy/server @streammy/prisma
+```
+
+Usage:
+
+```ts
+import { createPrismaPersistenceAdapter } from "@streammy/prisma";
+
+const persistence = createPrismaPersistenceAdapter({
+  callSession: prisma.callSession,
+  userPresence: prisma.userPresence,
+  socketConnection: prisma.socketConnection,
+});
+
+const streammy = createStreammyServer({
+  httpServer,
+  persistence,
+});
+```
+
+### PostgreSQL
+
+Install:
+
+```bash
+npm install @streammy/server @streammy/postgres pg
+```
+
+Usage:
+
+```ts
+import { Pool } from "pg";
+import { createPostgresPersistenceAdapter } from "@streammy/postgres";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+
+const persistence = createPostgresPersistenceAdapter({
+  client: pool,
+});
+```
+
+### Redis
+
+Install:
+
+```bash
+npm install @streammy/server @streammy/redis redis
+```
+
+Usage:
+
+```ts
+import { createClient } from "redis";
+import { createRedisPersistenceAdapter } from "@streammy/redis";
+
+const redis = createClient({ url: process.env.REDIS_URL });
+await redis.connect();
+
+const persistence = createRedisPersistenceAdapter({
+  client: redis,
+});
+```
+
+### Supabase
+
+Install:
+
+```bash
+npm install @streammy/server @streammy/supabase @supabase/supabase-js
+```
+
+Usage:
+
+```ts
+import { createClient } from "@supabase/supabase-js";
+import { createSupabasePersistenceAdapter } from "@streammy/supabase";
+
+const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
+
+const persistence = createSupabasePersistenceAdapter({
+  callSession: supabase.from("streammy_call_sessions"),
+  userPresence: supabase.from("streammy_user_presence"),
+  socketConnection: supabase.from("streammy_socket_connections"),
+});
+```
+
+### DynamoDB
+
+Install:
+
+```bash
+npm install @streammy/server @streammy/dynamodb @aws-sdk/lib-dynamodb
+```
+
+Usage:
+
+```ts
+import { createDynamoDbPersistenceAdapter } from "@streammy/dynamodb";
+
+const persistence = createDynamoDbPersistenceAdapter({
+  client: dynamoDocumentClient,
+});
+```
 
 ## 2. Express integration
 
@@ -247,6 +568,8 @@ The backend package handles:
 - presence updates
 - missed call timeout after 60 seconds
 - internal Socket.IO setup, so backend users do not need to install or create Socket.IO manually
+- in-memory storage by default
+- custom persistence via adapter injection
 
 ## Frontend Usage
 
@@ -572,6 +895,22 @@ Build only backend package:
 
 ```bash
 npm run build:server
+```
+
+Build only Mongoose adapter package:
+
+```bash
+npm run build:mongoose
+```
+
+Build the other adapter packages:
+
+```bash
+npm run build:prisma
+npm run build:postgres
+npm run build:redis
+npm run build:supabase
+npm run build:dynamodb
 ```
 
 Build only frontend package:

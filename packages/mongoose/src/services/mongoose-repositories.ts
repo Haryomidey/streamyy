@@ -1,14 +1,12 @@
 import type { Model } from "mongoose";
 import type {
   CallSessionRecord,
+  CallSessionRepository,
   PresenceRecord,
   SocketConnectionRecord,
-} from "../domain/call.js";
-import type {
-  CallSessionRepository,
   SocketConnectionRepository,
   UserPresenceRepository,
-} from "../domain/interfaces.js";
+} from "@streammy/core";
 
 export class MongooseCallSessionRepository implements CallSessionRepository {
   public constructor(private readonly model: Model<CallSessionRecord>) {}
