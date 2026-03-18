@@ -86,6 +86,7 @@ What they get:
 - `StreammyProvider`
 - `useStreammy()`
 - `StreammyCallWidget`
+- `VideoStage`
 - ringtone configuration
 - WebRTC helper utilities
 
@@ -450,6 +451,36 @@ peer.attachLocalStream(localStream);
 const offer = await peer.createOffer();
 client.sendOffer("call_123", "user_456", offer);
 ```
+
+## 6. WhatsApp-style video swap layout
+
+If the frontend team wants the common calling layout where:
+
+- one video is shown in the main area
+- the other video is shown in a smaller corner preview
+- tapping the smaller preview swaps them
+
+they can use `VideoStage`.
+
+```tsx
+import { VideoStage } from "streammy";
+
+<VideoStage
+  localStream={localStream}
+  remoteStream={remoteStream}
+  localLabel="You"
+  remoteLabel="Ada"
+  defaultMainView="remote"
+/>
+```
+
+Behavior:
+
+- remote video is large by default
+- local video appears in the smaller corner tile
+- clicking the smaller tile swaps the focus
+- clicking again swaps back
+- local video is not mirrored unless you opt in
 
 ### Video tile mirroring
 

@@ -2,6 +2,7 @@ export * from "./client.js";
 export * from "./components/CallControls.js";
 export * from "./components/IncomingCallCard.js";
 export * from "./components/StreammyCallWidget.js";
+export * from "./components/VideoStage.js";
 export * from "./components/VideoTile.js";
 export * from "./hooks/useRingtone.js";
 export * from "./hooks/useStreammy.js";
