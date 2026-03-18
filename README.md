@@ -1,38 +1,116 @@
-# Streammy Workspace
+# Streamyy Package Workspace
 
-This repository is now organized as a package-based calling platform with a lightweight frontend shell at the root and three publishable packages under `packages/`.
+This repository is the source code for publishable Streamyy packages.
+
+It is not a local app that consumes the packages.
+
+The goal is:
+
+- frontend developers install the frontend package
+- backend developers install the backend package
+- both connect through the same signaling contract
 
 ## Packages
 
-- `@streammy/core`
-  - framework-agnostic call orchestration
-  - strict TypeScript domain models and event contracts
-  - Mongoose schemas and repository implementations
-- `@streammy/server`
-  - Socket.IO transport binding
-  - Express and Fastify HTTP adapters
-  - Nest-style module export via `StreammyModule.forRoot(...)`
-- `streammy`
-  - frontend SDK
-  - React provider/hooks
-  - WebRTC media and peer connection helpers
-  - starter UI components
+### `@streammy/core`
 
-## Development
+Shared backend domain package:
+
+- call session types
+- call state engine
+- Mongoose models
+- repositories
+- event contracts
+
+### `@streammy/server`
+
+Backend package:
+
+- Socket.IO signaling transport
+- runtime bootstrap
+- Express adapter
+- Fastify adapter
+- Nest-style adapter
+
+### `streammy`
+
+Frontend package:
+
+- client SDK
+- React hooks
+- default call UI
+- ringtone support
+- WebRTC helpers
+
+## Workspace Install
+
+From the root of this repo:
 
 ```bash
 npm install
-npm run dev
 ```
 
-## Build Packages
+That installs dependencies for the workspace.
+
+## Build
+
+Build everything:
 
 ```bash
-npm run build:packages
+npm run build
 ```
+
+Build only backend server package:
+
+```bash
+npm run build:server
+```
+
+Build only frontend package:
+
+```bash
+npm run build:frontend
+```
+
+Build only core package:
+
+```bash
+npm run build:core
+```
+
+## Package Consumers
+
+### Frontend developer
+
+Installs:
+
+```bash
+npm install streammy
+```
+
+Uses:
+
+- default UI
+- hooks
+- signaling client
+- ringtone customization
+
+### Backend developer
+
+Installs:
+
+```bash
+npm install @streammy/server
+```
+
+Uses:
+
+- signaling runtime
+- adapters
+- call lifecycle backend
 
 ## Notes
 
-- The backend only handles signaling and call lifecycle state. It does not process media.
-- The server package is intentionally framework-agnostic; the adapters are thin layers around the shared core service.
-- The root Vite app is a showcase shell for the workspace architecture, not the SDK package itself.
+- The root exists to manage the workspace and builds.
+- The package source code lives under `packages/`.
+- There is no local demo app consuming the packages in this repo anymore.

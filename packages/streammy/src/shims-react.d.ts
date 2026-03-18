@@ -1,5 +1,6 @@
 declare module "react" {
   export type ReactNode = any;
+  export type CSSProperties = Record<string, unknown>;
   export type PropsWithChildren<T = {}> = T & { children?: ReactNode };
   export interface Context<T> {
     Provider: any;
@@ -9,7 +10,7 @@ declare module "react" {
   export function useEffect(effect: () => void | (() => void), deps?: readonly unknown[]): void;
   export function useMemo<T>(factory: () => T, deps: readonly unknown[]): T;
   export function useRef<T>(value: T): { current: T };
-  export function useState<T>(value: T): [T, (value: T) => void];
+  export function useState<T>(value: T): [T, (value: T | ((current: T) => T)) => void];
 }
 
 declare module "react/jsx-runtime" {
@@ -26,6 +27,9 @@ declare namespace JSX {
 
 declare module "socket.io-client" {
   export interface Socket {
+    io: {
+      on(event: string, listener: (payload?: any) => void): void;
+    };
     connect(): void;
     disconnect(): void;
     emit(event: string, payload?: unknown): void;

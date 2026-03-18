@@ -1,5 +1,0 @@
-{
-  "name": "Streamyy",
-  "description": "A premium, real-time video and audio calling experience for the modern social era.",
-  "requestFramePermissions": ["camera", "microphone"]
-}

@@ -15,6 +15,7 @@ export interface CreateStreammyRuntimeOptions {
   mongoose: Mongoose;
   io: SocketIoLikeServer;
   auth?: StreammyAuthHandler;
+  ringingTimeoutMs?: number;
 }
 
 export interface StreammyRuntime {
@@ -31,6 +32,7 @@ export const createStreammyRuntime = (options: CreateStreammyRuntimeOptions): St
     presence: new MongooseUserPresenceRepository(models.UserPresence),
     connections: new MongooseSocketConnectionRepository(models.SocketConnection),
     notifier,
+    ringingTimeoutMs: options.ringingTimeoutMs,
   });
 
   return {

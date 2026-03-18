@@ -52,6 +52,11 @@ export interface StreammyCoreOptions {
   events?: TypedEventBus;
   now?: () => Date;
   idFactory?: () => string;
+  ringingTimeoutMs?: number;
+  scheduler?: {
+    setTimeout(handler: () => void, timeoutMs: number): unknown;
+    clearTimeout(handle: unknown): void;
+  };
 }
 
 export type TypedEventBus = EventEmitter & {
@@ -75,6 +80,7 @@ export interface StreammyService {
   declineCall(input: { callId: string; userId: string; deviceId?: string; reason?: string }): Promise<CallSessionRecord>;
   cancelCall(input: { callId: string; userId: string; deviceId?: string }): Promise<CallSessionRecord>;
   endCall(input: { callId: string; userId: string; deviceId?: string }): Promise<CallSessionRecord>;
+  markCallMissed(callId: string): Promise<CallSessionRecord>;
   relayOffer(input: { callId: string; fromUserId: string; targetUserId: string; payload: unknown }): Promise<void>;
   relayAnswer(input: { callId: string; fromUserId: string; targetUserId: string; payload: unknown }): Promise<void>;
   relayIceCandidate(input: { callId: string; fromUserId: string; targetUserId: string; payload: unknown }): Promise<void>;

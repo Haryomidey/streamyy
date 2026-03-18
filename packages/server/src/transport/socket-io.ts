@@ -3,6 +3,20 @@ import type { SocketIoLikeSocket, StreammySocketServerOptions } from "../types.j
 
 const userRoom = (userId: string): string => `streammy:user:${userId}`;
 
+const withOptionalMetadata = <TValue extends { userId: string; deviceId: string }>(
+  value: TValue,
+  metadata: Record<string, unknown> | undefined,
+): TValue & { metadata?: Record<string, unknown> } => {
+  if (metadata === undefined) {
+    return value;
+  }
+
+  return {
+    ...value,
+    metadata,
+  };
+};
+
 const readAuthToken = (socket: SocketIoLikeSocket): string | undefined => {
   const authToken = socket.handshake.auth?.token;
   if (typeof authToken === "string") {
@@ -45,13 +59,19 @@ const applyAuth = async (
     }
 
     const deviceId = socket.handshake.auth?.deviceId;
+    const metadata =
+      typeof socket.handshake.auth?.metadata === "object" && socket.handshake.auth?.metadata !== null
+        ? (socket.handshake.auth.metadata as Record<string, unknown>)
+        : undefined;
+
     return {
-      userId,
-      deviceId: typeof deviceId === "string" && deviceId.length > 0 ? deviceId : socket.id,
-      metadata:
-        typeof socket.handshake.auth?.metadata === "object" && socket.handshake.auth?.metadata !== null
-          ? (socket.handshake.auth.metadata as Record<string, unknown>)
-          : undefined,
+      ...withOptionalMetadata(
+        {
+          userId,
+          deviceId: typeof deviceId === "string" && deviceId.length > 0 ? deviceId : socket.id,
+        },
+        metadata,
+      ),
     };
   }
 
@@ -76,12 +96,16 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
   options.io.on("connection", (socket) => {
     const auth = socket.data.streammy as StreammyAuthResult;
     void socket.join(userRoom(auth.userId));
-    void options.service.connect({
-      connectionId: socket.id,
-      userId: auth.userId,
-      deviceId: auth.deviceId,
-      metadata: auth.metadata,
-    });
+    void options.service.connect(
+      withOptionalMetadata(
+        {
+          connectionId: socket.id,
+          userId: auth.userId,
+          deviceId: auth.deviceId,
+        },
+        auth.metadata,
+      ),
+    );
 
     socket.on("disconnect", () => {
       void options.service.disconnect(socket.id);

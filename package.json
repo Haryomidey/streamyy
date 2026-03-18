@@ -7,34 +7,17 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "npm run build:app && npm run build:packages",
-    "build:app": "vite build",
+    "build": "npm run build:packages",
     "build:packages": "tsc -b packages/core packages/server packages/streammy",
+    "build:core": "tsc -b packages/core",
+    "build:server": "tsc -b packages/server",
+    "build:frontend": "tsc -b packages/streammy",
     "typecheck": "tsc -b --pretty false packages/core packages/server packages/streammy",
     "lint": "npm run typecheck",
     "clean": "if (Test-Path dist) { Remove-Item -Recurse -Force dist }; Get-ChildItem packages -Directory | ForEach-Object { if (Test-Path (Join-Path $_.FullName 'dist')) { Remove-Item -Recurse -Force (Join-Path $_.FullName 'dist') } }"
   },
-  "dependencies": {
-    "@google/genai": "^1.29.0",
-    "@tailwindcss/vite": "^4.1.14",
-    "@vitejs/plugin-react": "^5.0.4",
-    "dotenv": "^17.2.3",
-    "express": "^4.21.2",
-    "lucide-react": "^0.546.0",
-    "motion": "^12.23.24",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "vite": "^6.2.0"
-  },
   "devDependencies": {
-    "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "autoprefixer": "^10.4.21",
-    "tailwindcss": "^4.1.14",
-    "tsx": "^4.21.0",
     "typescript": "~5.8.2"
   }
 }

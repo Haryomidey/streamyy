@@ -18,11 +18,23 @@ export class DefaultStreammyService implements StreammyService {
   private readonly events;
   private readonly now;
   private readonly idFactory;
+  private readonly ringingTimeoutMs;
+  private readonly scheduler;
+  private readonly ringingTimers = new Map<string, unknown>();
 
   public constructor(private readonly options: StreammyCoreOptions) {
     this.events = options.events ?? createEventBus();
     this.now = options.now ?? (() => new Date());
     this.idFactory = options.idFactory ?? randomId;
+    this.ringingTimeoutMs = options.ringingTimeoutMs ?? 60_000;
+    this.scheduler = options.scheduler ?? {
+      setTimeout(handler, timeoutMs) {
+        return globalThis.setTimeout(handler, timeoutMs);
+      },
+      clearTimeout(handle) {
+        globalThis.clearTimeout(handle as ReturnType<typeof setTimeout>);
+      },
+    };
   }
 
   public async connect(context: ConnectionContext): Promise<SocketConnectionRecord> {
@@ -70,6 +82,7 @@ export class DefaultStreammyService implements StreammyService {
     const session = await this.updateCall(created.callId, {
       status: "ringing",
     });
+    this.scheduleMissedCallTimeout(session.callId);
 
     await this.options.notifier.emitToUser(input.receiverId, STREAMMY_EVENTS.callIncoming, {
       callId: session.callId,
@@ -95,6 +108,7 @@ export class DefaultStreammyService implements StreammyService {
       throw new StreammyError("CALL_RECEIVER_MISMATCH", "Only the receiver can accept this call.");
     }
 
+    this.clearMissedCallTimeout(input.callId);
     assertTransition(session.status, "accepted");
     const acceptedAt = this.now();
     const updated = await this.updateCall(input.callId, {
@@ -125,6 +139,7 @@ export class DefaultStreammyService implements StreammyService {
       throw new StreammyError("CALL_RECEIVER_MISMATCH", "Only the receiver can decline this call.");
     }
 
+    this.clearMissedCallTimeout(input.callId);
     assertTransition(session.status, "declined");
     const updated = await this.updateCall(input.callId, {
       status: "declined",
@@ -154,6 +169,7 @@ export class DefaultStreammyService implements StreammyService {
       throw new StreammyError("CALL_CALLER_MISMATCH", "Only the caller can cancel this call.");
     }
 
+    this.clearMissedCallTimeout(input.callId);
     assertTransition(session.status, "cancelled");
     const updated = await this.updateCall(input.callId, {
       status: "cancelled",
@@ -182,6 +198,7 @@ export class DefaultStreammyService implements StreammyService {
       throw new StreammyError("CALL_PARTICIPANT_MISMATCH", "Only call participants can end the call.");
     }
 
+    this.clearMissedCallTimeout(input.callId);
     assertTransition(session.status, "ended");
     const endedAt = this.now();
     const duration = session.startedAt
@@ -204,6 +221,44 @@ export class DefaultStreammyService implements StreammyService {
       duration: updated.duration,
     });
 
+    this.events.emit("call.ended", updated);
+    return updated;
+  }
+
+  public async markCallMissed(callId: string): Promise<CallSessionRecord> {
+    const session = await this.requireCall(callId);
+    if (session.status !== "ringing" && session.status !== "initiated") {
+      return session;
+    }
+
+    this.clearMissedCallTimeout(callId);
+    const endedAt = this.now();
+    const updated = await this.updateCall(callId, {
+      status: "missed",
+      endedAt,
+      endedBy: "system:ring-timeout",
+      duration: 0,
+    });
+
+    await this.options.notifier.emitToUser(updated.callerId, STREAMMY_EVENTS.callEnd, {
+      callId: updated.callId,
+      endedBy: "system:ring-timeout",
+      status: updated.status,
+      endedAt: updated.endedAt,
+      duration: 0,
+      reason: "ring_timeout",
+    });
+
+    await this.options.notifier.emitToUser(updated.receiverId, STREAMMY_EVENTS.callEnd, {
+      callId: updated.callId,
+      endedBy: "system:ring-timeout",
+      status: updated.status,
+      endedAt: updated.endedAt,
+      duration: 0,
+      reason: "ring_timeout",
+    });
+
+    this.events.emit("call.updated", updated);
     this.events.emit("call.ended", updated);
     return updated;
   }
@@ -306,6 +361,24 @@ export class DefaultStreammyService implements StreammyService {
     await this.options.notifier.emitToUser(userId, STREAMMY_EVENTS.presenceUpdate, presence);
     this.events.emit("presence.updated", presence);
     return presence;
+  }
+
+  private scheduleMissedCallTimeout(callId: string): void {
+    this.clearMissedCallTimeout(callId);
+    const handle = this.scheduler.setTimeout(() => {
+      void this.markCallMissed(callId).catch(() => {});
+    }, this.ringingTimeoutMs);
+    this.ringingTimers.set(callId, handle);
+  }
+
+  private clearMissedCallTimeout(callId: string): void {
+    const handle = this.ringingTimers.get(callId);
+    if (!handle) {
+      return;
+    }
+
+    this.scheduler.clearTimeout(handle);
+    this.ringingTimers.delete(callId);
   }
 }
 
