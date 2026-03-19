@@ -41,6 +41,7 @@ interface StreamyyContextValue {
 }
 
 const StreamyyContext = createContext<StreamyyContextValue | null>(null);
+const ACTIVE_CALL_STORAGE_KEY = "streamyy:active-call";
 
 const createEmptyRemoteStream = (): MediaStream => new MediaStream();
 
@@ -52,6 +53,21 @@ const stopStream = (stream: MediaStream | null): void => {
   for (const track of stream.getTracks()) {
     track.stop();
   }
+};
+
+const canRestoreCall = (
+  call: StreamyyActiveCall | null,
+): call is StreamyyActiveCall => {
+  if (!call) {
+    return false;
+  }
+
+  return (
+    call.status === "accepted" ||
+    call.status === "ongoing" ||
+    call.status === "initiated" ||
+    call.status === "ringing"
+  );
 };
 
 export const StreamyyProvider = ({
@@ -79,6 +95,33 @@ export const StreamyyProvider = ({
   const peerSessionRef = useRef<StreamyyPeerSession | null>(null);
   const attachedLocalStreamRef = useRef(false);
   const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const shouldResumeCallRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const raw = window.sessionStorage.getItem(ACTIVE_CALL_STORAGE_KEY);
+    if (!raw) {
+      return;
+    }
+
+    try {
+      const restored = JSON.parse(raw) as StreamyyActiveCall;
+      if (!canRestoreCall(restored)) {
+        window.sessionStorage.removeItem(ACTIVE_CALL_STORAGE_KEY);
+        return;
+      }
+
+      updateCallState(restored);
+      setCallStatus(restored.status);
+      setVideoEnabled(restored.callType === "video");
+      shouldResumeCallRef.current = true;
+    } catch {
+      window.sessionStorage.removeItem(ACTIVE_CALL_STORAGE_KEY);
+    }
+  }, []);
 
   useEffect(() => {
     activeCallRef.current = activeCall;
@@ -91,6 +134,19 @@ export const StreamyyProvider = ({
   useEffect(() => {
     remoteStreamRef.current = remoteStream;
   }, [remoteStream]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    if (canRestoreCall(activeCall)) {
+      window.sessionStorage.setItem(ACTIVE_CALL_STORAGE_KEY, JSON.stringify(activeCall));
+      return;
+    }
+
+    window.sessionStorage.removeItem(ACTIVE_CALL_STORAGE_KEY);
+  }, [activeCall]);
 
   const teardownPeerSession = (): void => {
     peerSessionRef.current?.close();
@@ -233,6 +289,21 @@ export const StreamyyProvider = ({
         : current,
     );
     setCallStatus("ongoing");
+  };
+
+  const resumeActiveCall = async (call: StreamyyActiveCall): Promise<void> => {
+    const resumableStatus = call.status === "accepted" || call.status === "ongoing";
+    if (!resumableStatus) {
+      return;
+    }
+
+    const stream = await ensureLocalStream(call.callType);
+    const session = ensurePeerSession(call);
+    attachLocalStream(session, stream);
+
+    const offer = await session.createOffer();
+    const remoteUserId = call.direction === "incoming" ? call.callerId : call.receiverId;
+    client.sendOffer(call.callId, remoteUserId, offer);
   };
 
   useEffect(() => {
@@ -419,6 +490,21 @@ export const StreamyyProvider = ({
     };
   }, [client, options.userId]);
 
+  useEffect(() => {
+    if (!connected || !shouldResumeCallRef.current) {
+      return;
+    }
+
+    const current = activeCallRef.current;
+    if (!current || !canRestoreCall(current)) {
+      shouldResumeCallRef.current = false;
+      return;
+    }
+
+    shouldResumeCallRef.current = false;
+    void resumeActiveCall(current);
+  }, [connected]);
+
   const media = useMemo<StreamyyCallMediaState>(
     () => ({
       localStream,
@@ -579,6 +665,9 @@ export const StreamyyProvider = ({
         resetCallArtifacts();
         updateCallState(null);
         setCallStatus("idle");
+        if (typeof window !== "undefined") {
+          window.sessionStorage.removeItem(ACTIVE_CALL_STORAGE_KEY);
+        }
       },
     }),
     [activeCall, callStatus, client, connected, media, muted, reconnecting, videoEnabled],

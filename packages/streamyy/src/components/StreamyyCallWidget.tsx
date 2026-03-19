@@ -301,6 +301,20 @@ export const StreamyyCallWidget = ({
     };
   }, [activeCall, callStatus, isFinished, isIncomingRinging]);
 
+  useEffect(() => {
+    if (!activeCall || !isFinished) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      clearActiveCall();
+    }, 1200);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [activeCall, clearActiveCall, isFinished]);
+
   const currentRemoteId = activeCall ? getRemoteId(activeCall) : defaultReceiverId || "Remote";
   const remoteAvatar = activeCall
     ? (resolveAvatarSrc?.(activeCall, "remote") ?? readAvatarFromMetadata(activeCall, "remote"))
@@ -599,27 +613,6 @@ export const StreamyyCallWidget = ({
                   }}
                 />
               </div>
-
-              {isFinished ? (
-                <button
-                  type="button"
-                  onClick={clearActiveCall}
-                  style={{
-                    position: "absolute",
-                    top: "1.25rem",
-                    right: "1.25rem",
-                    borderRadius: "999px",
-                    border: "1px solid rgba(255, 255, 255, 0.08)",
-                    background: "#1d1d21",
-                    color: "white",
-                    padding: "0.7rem 0.95rem",
-                    cursor: "pointer",
-                    zIndex: 2,
-                  }}
-                >
-                  Clear
-                </button>
-              ) : null}
             </section>
             )
         : null}
