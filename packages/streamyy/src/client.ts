@@ -6,23 +6,23 @@ import {
 } from "@streamyy/core";
 import { io, type Socket } from "socket.io-client";
 import type {
-  StreammyCallAccepted,
-  StreammyCallEnded,
-  StreammyClientEvents,
-  StreammyClientOptions,
-  StreammyIncomingCall,
-  StreammySignalEvent,
-  StreammySimpleCallEvent,
+  StreamyyCallAccepted,
+  StreamyyCallEnded,
+  StreamyyClientEvents,
+  StreamyyClientOptions,
+  StreamyyIncomingCall,
+  StreamyySignalEvent,
+  StreamyySimpleCallEvent,
 } from "./types.js";
 
-type EventKey = keyof StreammyClientEvents;
-type Listener<TKey extends EventKey> = (payload: StreammyClientEvents[TKey]) => void;
+type EventKey = keyof StreamyyClientEvents;
+type Listener<TKey extends EventKey> = (payload: StreamyyClientEvents[TKey]) => void;
 
-export class StreammyClient {
+export class StreamyyClient {
   private readonly socket: Socket;
   private readonly listeners = new Map<EventKey, Set<Listener<any>>>();
 
-  public constructor(private readonly options: StreammyClientOptions) {
+  public constructor(private readonly options: StreamyyClientOptions) {
     this.socket = io(options.url, {
       autoConnect: options.autoConnect ?? true,
       transports: options.lowBandwidthMode ? ["websocket"] : undefined,
@@ -103,31 +103,31 @@ export class StreammyClient {
       this.emit("reconnecting", { attempt }),
     );
     this.socket.io.on("reconnect", () => this.emit("reconnected", undefined));
-    this.socket.on(STREAMMY_EVENTS.callIncoming, (payload: StreammyIncomingCall) =>
+    this.socket.on(STREAMMY_EVENTS.callIncoming, (payload: StreamyyIncomingCall) =>
       this.emit("incomingCall", payload),
     );
     this.socket.on(STREAMMY_EVENTS.callInitiate, (payload: CallSessionRecord) =>
       this.emit("callInitiated", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callAccept, (payload: StreammyCallAccepted) =>
+    this.socket.on(STREAMMY_EVENTS.callAccept, (payload: StreamyyCallAccepted) =>
       this.emit("callAccepted", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callDecline, (payload: StreammySimpleCallEvent) =>
+    this.socket.on(STREAMMY_EVENTS.callDecline, (payload: StreamyySimpleCallEvent) =>
       this.emit("callDeclined", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callCancel, (payload: StreammySimpleCallEvent) =>
+    this.socket.on(STREAMMY_EVENTS.callCancel, (payload: StreamyySimpleCallEvent) =>
       this.emit("callCancelled", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callEnd, (payload: StreammyCallEnded) =>
+    this.socket.on(STREAMMY_EVENTS.callEnd, (payload: StreamyyCallEnded) =>
       this.emit("callEnded", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callOffer, (payload: StreammySignalEvent) =>
+    this.socket.on(STREAMMY_EVENTS.callOffer, (payload: StreamyySignalEvent) =>
       this.emit("offer", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callAnswer, (payload: StreammySignalEvent) =>
+    this.socket.on(STREAMMY_EVENTS.callAnswer, (payload: StreamyySignalEvent) =>
       this.emit("answer", payload),
     );
-    this.socket.on(STREAMMY_EVENTS.callIceCandidate, (payload: StreammySignalEvent) =>
+    this.socket.on(STREAMMY_EVENTS.callIceCandidate, (payload: StreamyySignalEvent) =>
       this.emit("iceCandidate", payload),
     );
     this.socket.on(STREAMMY_EVENTS.presenceUpdate, (payload: PresenceRecord) =>
@@ -135,7 +135,7 @@ export class StreammyClient {
     );
   }
 
-  private emit<TKey extends EventKey>(event: TKey, payload: StreammyClientEvents[TKey]): void {
+  private emit<TKey extends EventKey>(event: TKey, payload: StreamyyClientEvents[TKey]): void {
     const listeners = this.listeners.get(event);
     if (!listeners) {
       return;
@@ -147,6 +147,6 @@ export class StreammyClient {
   }
 }
 
-export const createStreammyClient = (options: StreammyClientOptions): StreammyClient => {
-  return new StreammyClient(options);
+export const createStreamyyClient = (options: StreamyyClientOptions): StreamyyClient => {
+  return new StreamyyClient(options);
 };

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
-import type { StreammyRingtoneSource, TonePatternStep } from "../types.js";
+import type { StreamyyRingtoneSource, TonePatternStep } from "../types.js";
 
-const defaultIncoming: StreammyRingtoneSource = {
+const defaultIncoming: StreamyyRingtoneSource = {
   kind: "pattern",
   pattern: {
     steps: [
@@ -12,7 +12,7 @@ const defaultIncoming: StreammyRingtoneSource = {
   },
 };
 
-const defaultOutgoing: StreammyRingtoneSource = {
+const defaultOutgoing: StreamyyRingtoneSource = {
   kind: "pattern",
   pattern: {
     steps: [{ frequency: 520, durationMs: 850, gain: 0.05 }],
@@ -43,7 +43,7 @@ const playToneStep = (
   return step.durationMs;
 };
 
-const startPatternPlayback = (source: Extract<StreammyRingtoneSource, { kind: "pattern" }>): StopHandler => {
+const startPatternPlayback = (source: Extract<StreamyyRingtoneSource, { kind: "pattern" }>): StopHandler => {
   const AudioContextCtor = window.AudioContext;
   if (!AudioContextCtor) {
     return () => {};
@@ -90,7 +90,7 @@ const startPatternPlayback = (source: Extract<StreammyRingtoneSource, { kind: "p
   };
 };
 
-const startUrlPlayback = (source: Extract<StreammyRingtoneSource, { kind: "url" }>): StopHandler => {
+const startUrlPlayback = (source: Extract<StreamyyRingtoneSource, { kind: "url" }>): StopHandler => {
   const audio = new Audio(source.src);
   audio.loop = true;
   audio.volume = source.volume ?? 1;
@@ -102,28 +102,34 @@ const startUrlPlayback = (source: Extract<StreammyRingtoneSource, { kind: "url" 
   };
 };
 
+const createPlayback = (source: StreamyyRingtoneSource): StopHandler => {
+  if (source.kind === "url") {
+    return startUrlPlayback(source);
+  }
+
+  return startPatternPlayback(source);
+};
+
 export const useRingtone = (
-  active: boolean,
-  source: StreammyRingtoneSource | undefined,
+  enabled: boolean,
+  source: StreamyyRingtoneSource | undefined,
   fallback: "incoming" | "outgoing",
 ): void => {
   const stopRef = useRef<StopHandler | null>(null);
 
   useEffect(() => {
-    if (!active) {
+    if (!enabled) {
       stopRef.current?.();
       stopRef.current = null;
       return;
     }
 
-    const selected = source ?? defaultRingtones[fallback];
-    stopRef.current?.();
-    stopRef.current =
-      selected.kind === "url" ? startUrlPlayback(selected) : startPatternPlayback(selected);
+    const resolvedSource = source ?? defaultRingtones[fallback];
+    stopRef.current = createPlayback(resolvedSource);
 
     return () => {
       stopRef.current?.();
       stopRef.current = null;
     };
-  }, [active, fallback, source]);
+  }, [enabled, fallback, source]);
 };

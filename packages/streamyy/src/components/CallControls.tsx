@@ -1,29 +1,39 @@
+import type { ReactNode } from "react";
 import type { CallControlsState } from "../types.js";
 
 export interface CallControlsProps {
   state: CallControlsState;
   showVideoToggle?: boolean;
+  icons?: {
+    mute?: ReactNode;
+    unmute?: ReactNode;
+    video?: ReactNode;
+    videoOff?: ReactNode;
+    hangup?: ReactNode;
+  };
   onToggleMute(): void;
   onToggleVideo(): void;
   onHangup(): void;
 }
 
 const controlButton = (background: string): Record<string, unknown> => ({
-  width: "3.75rem",
-  height: "3.75rem",
+  width: "4rem",
+  height: "4rem",
   borderRadius: "999px",
-  border: 0,
+  border: "1px solid rgba(255, 255, 255, 0.08)",
   background,
   color: "white",
   display: "grid",
   placeItems: "center",
   cursor: "pointer",
-  boxShadow: "0 14px 28px rgba(15, 23, 42, 0.24)",
+  backdropFilter: "blur(18px)",
+  boxShadow: "0 10px 30px rgba(0, 0, 0, 0.28)",
 });
 
 export const CallControls = ({
   state,
   showVideoToggle = true,
+  icons,
   onToggleMute,
   onToggleVideo,
   onHangup,
@@ -32,19 +42,23 @@ export const CallControls = ({
     <div
       style={{
         display: "flex",
-        gap: "0.9rem",
+        gap: "1rem",
         alignItems: "center",
         justifyContent: "center",
-        flexWrap: "wrap",
+        padding: "1rem 1.2rem",
+        borderRadius: "999px",
+        background: "rgba(47, 48, 52, 0.78)",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
+        backdropFilter: "blur(20px)",
       }}
     >
       <button
         type="button"
         aria-label={state.muted ? "Unmute microphone" : "Mute microphone"}
         onClick={onToggleMute}
-        style={controlButton(state.muted ? "#f59e0b" : "rgba(255, 255, 255, 0.14)")}
+        style={controlButton("rgba(255, 255, 255, 0.08)")}
       >
-        {state.muted ? "Mic off" : "Mic"}
+        {state.muted ? icons?.unmute : icons?.mute}
       </button>
 
       {showVideoToggle ? (
@@ -52,9 +66,9 @@ export const CallControls = ({
           type="button"
           aria-label={state.videoEnabled ? "Turn off camera" : "Turn on camera"}
           onClick={onToggleVideo}
-          style={controlButton(state.videoEnabled ? "rgba(255, 255, 255, 0.14)" : "#2563eb")}
+          style={controlButton("rgba(255, 255, 255, 0.08)")}
         >
-          {state.videoEnabled ? "Video" : "Cam off"}
+          {state.videoEnabled ? icons?.video : icons?.videoOff}
         </button>
       ) : null}
 
@@ -62,9 +76,9 @@ export const CallControls = ({
         type="button"
         aria-label="End call"
         onClick={onHangup}
-        style={controlButton("#ef4444")}
+        style={controlButton("#ff3347")}
       >
-        End
+        {icons?.hangup}
       </button>
     </div>
   );

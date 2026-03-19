@@ -1,79 +1,84 @@
-import type { StreammyIncomingCall } from "../types.js";
+import type { ReactNode } from "react";
+import type { StreamyyIncomingCall } from "../types.js";
 
 export interface IncomingCallCardProps {
-  call: StreammyIncomingCall;
+  call: StreamyyIncomingCall;
+  avatar?: ReactNode;
+  acceptIcon?: ReactNode;
+  declineIcon?: ReactNode;
   onAccept(): void;
   onDecline(): void;
 }
 
-const avatarStyle: Record<string, unknown> = {
-  width: "4.75rem",
-  height: "4.75rem",
-  borderRadius: "999px",
-  display: "grid",
-  placeItems: "center",
-  background: "linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(16, 185, 129, 0.16))",
-  border: "1px solid rgba(134, 239, 172, 0.24)",
-  color: "#dcfce7",
-  fontSize: "1.4rem",
-  fontWeight: 700,
-};
-
-export const IncomingCallCard = ({ call, onAccept, onDecline }: IncomingCallCardProps) => {
+export const IncomingCallCard = ({
+  call,
+  avatar,
+  acceptIcon,
+  declineIcon,
+  onAccept,
+  onDecline,
+}: IncomingCallCardProps) => {
   return (
     <section
       style={{
-        padding: "1.35rem",
-        borderRadius: "1.6rem",
-        border: "1px solid rgba(255, 255, 255, 0.08)",
+        width: "min(24rem, calc(100vw - 2rem))",
+        padding: "2rem",
+        borderRadius: "2rem",
+        border: "1px solid rgba(255, 255, 255, 0.06)",
         display: "grid",
-        gap: "1rem",
-        background: "linear-gradient(180deg, rgba(17, 24, 39, 0.92), rgba(3, 7, 18, 0.96))",
+        gap: "1.5rem",
+        background: "#1d1d21",
         color: "white",
+        textAlign: "center",
+        boxShadow: "0 20px 60px rgba(0, 0, 0, 0.42)",
       }}
     >
-      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-        <div style={avatarStyle}>{call.callerId.slice(0, 2).toUpperCase()}</div>
-        <div style={{ display: "grid", gap: "0.25rem" }}>
-          <strong style={{ fontSize: "1.15rem" }}>{call.callerId}</strong>
-          <span style={{ color: "rgba(226, 232, 240, 0.74)" }}>
-            Incoming {call.callType} call
+      <div style={{ display: "grid", gap: "1rem", justifyItems: "center" }}>
+        {avatar}
+        <div style={{ display: "grid", gap: "0.35rem" }}>
+          <strong style={{ fontSize: "2rem", lineHeight: 1.1 }}>{call.callerId}</strong>
+          <span style={{ color: "rgba(255, 255, 255, 0.62)", fontSize: "1.05rem" }}>
+            Incoming {call.callType} call...
           </span>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "0.9rem", justifyContent: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "2rem", paddingInline: "1.5rem" }}>
         <button
           type="button"
+          aria-label="Decline call"
           onClick={onDecline}
           style={{
             width: "4rem",
             height: "4rem",
             borderRadius: "999px",
             border: 0,
-            background: "#ef4444",
+            background: "#ff3347",
             color: "white",
-            fontWeight: 700,
+            display: "grid",
+            placeItems: "center",
             cursor: "pointer",
           }}
         >
-          End
+          {declineIcon}
         </button>
         <button
           type="button"
+          aria-label="Accept call"
           onClick={onAccept}
           style={{
             width: "4rem",
             height: "4rem",
             borderRadius: "999px",
             border: 0,
-            background: "#22c55e",
+            background: "#00c781",
             color: "white",
-            fontWeight: 700,
+            display: "grid",
+            placeItems: "center",
             cursor: "pointer",
           }}
         >
-          Pick
+          {acceptIcon}
         </button>
       </div>
     </section>

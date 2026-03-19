@@ -1,7 +1,7 @@
 import type { CallSessionRecord, CallType, PresenceRecord } from "@streamyy/core";
 import type { ReactNode } from "react";
 
-export interface StreammyClientOptions {
+export interface StreamyyClientOptions {
   url: string;
   token?: string;
   userId: string;
@@ -16,7 +16,7 @@ export interface StreammyClientOptions {
   connectionTimeoutMs?: number;
 }
 
-export interface StreammyIncomingCall {
+export interface StreamyyIncomingCall {
   callId: string;
   callerId: string;
   receiverId: string;
@@ -25,7 +25,7 @@ export interface StreammyIncomingCall {
   metadata?: Record<string, unknown>;
 }
 
-export interface StreammyCallAccepted {
+export interface StreamyyCallAccepted {
   callId: string;
   acceptedBy: string;
   deviceId?: string;
@@ -33,7 +33,7 @@ export interface StreammyCallAccepted {
   status: CallSessionRecord["status"];
 }
 
-export interface StreammyCallEnded {
+export interface StreamyyCallEnded {
   callId: string;
   endedBy: string;
   deviceId?: string;
@@ -43,33 +43,33 @@ export interface StreammyCallEnded {
   reason?: string;
 }
 
-export interface StreammySimpleCallEvent {
+export interface StreamyySimpleCallEvent {
   callId: string;
   deviceId?: string;
   status: CallSessionRecord["status"];
   reason?: string;
 }
 
-export interface StreammySignalEvent {
+export interface StreamyySignalEvent {
   callId: string;
   fromUserId: string;
   payload: Record<string, unknown>;
 }
 
-export interface StreammyClientEvents {
+export interface StreamyyClientEvents {
   connected: void;
   disconnected: void;
   reconnecting: { attempt: number };
   reconnected: void;
-  incomingCall: StreammyIncomingCall;
+  incomingCall: StreamyyIncomingCall;
   callInitiated: CallSessionRecord;
-  callAccepted: StreammyCallAccepted;
-  callDeclined: StreammySimpleCallEvent;
-  callCancelled: StreammySimpleCallEvent;
-  callEnded: StreammyCallEnded;
-  offer: StreammySignalEvent;
-  answer: StreammySignalEvent;
-  iceCandidate: StreammySignalEvent;
+  callAccepted: StreamyyCallAccepted;
+  callDeclined: StreamyySimpleCallEvent;
+  callCancelled: StreamyySimpleCallEvent;
+  callEnded: StreamyyCallEnded;
+  offer: StreamyySignalEvent;
+  answer: StreamyySignalEvent;
+  iceCandidate: StreamyySignalEvent;
   presenceUpdated: PresenceRecord;
 }
 
@@ -78,15 +78,15 @@ export interface CallControlsState {
   videoEnabled: boolean;
 }
 
-export type StreammyCallDirection = "incoming" | "outgoing";
+export type StreamyyCallDirection = "incoming" | "outgoing";
 
-export interface StreammyActiveCall {
+export interface StreamyyActiveCall {
   callId: string;
   callerId: string;
   receiverId: string;
   callType: CallType;
   status: CallSessionRecord["status"];
-  direction: StreammyCallDirection;
+  direction: StreamyyCallDirection;
   metadata?: Record<string, unknown>;
 }
 
@@ -101,7 +101,7 @@ export interface TonePattern {
   pauseMs?: number;
 }
 
-export type StreammyRingtoneSource =
+export type StreamyyRingtoneSource =
   | {
       kind: "url";
       src: string;
@@ -113,12 +113,12 @@ export type StreammyRingtoneSource =
       volume?: number;
     };
 
-export interface StreammyRingtoneSet {
-  incoming?: StreammyRingtoneSource;
-  outgoing?: StreammyRingtoneSource;
+export interface StreamyyRingtoneSet {
+  incoming?: StreamyyRingtoneSource;
+  outgoing?: StreamyyRingtoneSource;
 }
 
-export interface StreammyCallMediaState {
+export interface StreamyyCallMediaState {
   localStream: MediaStream | null;
   remoteStream: MediaStream | null;
   muted: boolean;
@@ -128,20 +128,20 @@ export interface StreammyCallMediaState {
   hasRemoteVideo: boolean;
 }
 
-export interface StreammyIncomingCallRenderProps {
-  call: StreammyActiveCall;
+export interface StreamyyIncomingCallRenderProps {
+  call: StreamyyActiveCall;
   connected: boolean;
   reconnecting: boolean;
   accept(): Promise<void>;
   decline(reason?: string): Promise<void>;
 }
 
-export interface StreammyCallInterfaceRenderProps {
-  activeCall: StreammyActiveCall;
+export interface StreamyyCallInterfaceRenderProps {
+  activeCall: StreamyyActiveCall;
   callStatus: CallSessionRecord["status"] | "idle";
   connected: boolean;
   reconnecting: boolean;
-  media: StreammyCallMediaState;
+  media: StreamyyCallMediaState;
   clear(): void;
   cancel(): Promise<void>;
   end(): Promise<void>;
@@ -149,10 +149,10 @@ export interface StreammyCallInterfaceRenderProps {
   toggleVideo(nextEnabled?: boolean): void;
 }
 
-export type StreammyIncomingCallRenderer = (
-  props: StreammyIncomingCallRenderProps,
+export type StreamyyIncomingCallRenderer = (
+  props: StreamyyIncomingCallRenderProps,
 ) => ReactNode;
 
-export type StreammyCallInterfaceRenderer = (
-  props: StreammyCallInterfaceRenderProps,
+export type StreamyyCallInterfaceRenderer = (
+  props: StreamyyCallInterfaceRenderProps,
 ) => ReactNode;

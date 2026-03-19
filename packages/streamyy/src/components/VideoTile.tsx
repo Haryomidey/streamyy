@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 export interface VideoTileProps {
   stream: MediaStream | null;
   muted?: boolean;
-  label: string;
+  label?: string;
   mirrored?: boolean;
   onClick?: () => void;
   active?: boolean;
@@ -28,13 +28,7 @@ export const VideoTile = ({
   }, [stream]);
 
   return (
-    <figure
-      style={{
-        display: "grid",
-        gap: "0.5rem",
-        margin: 0,
-      }}
-    >
+    <figure style={{ display: "grid", margin: 0, width: "100%", height: "100%" }}>
       <video
         ref={ref}
         autoPlay
@@ -43,24 +37,34 @@ export const VideoTile = ({
         onClick={onClick}
         style={{
           width: "100%",
-          minHeight: compact ? "7rem" : "12rem",
-          background: "#111827",
-          borderRadius: "1rem",
+          height: compact ? "8.5rem" : "100%",
+          minHeight: compact ? "8.5rem" : "100%",
+          background: "#2b2b2f",
+          borderRadius: compact ? "1.15rem" : "0",
           objectFit: "cover",
           transform: mirrored ? "scaleX(-1)" : "none",
           cursor: onClick ? "pointer" : "default",
-          border: active ? "2px solid rgba(56, 189, 248, 0.9)" : "1px solid rgba(148, 163, 184, 0.18)",
-          boxShadow: active ? "0 0 0 4px rgba(14, 165, 233, 0.12)" : "none",
+          border: compact ? "1px solid rgba(255, 255, 255, 0.12)" : active ? 0 : 0,
+          boxShadow: compact ? "0 16px 32px rgba(0, 0, 0, 0.38)" : "none",
         }}
       />
-      <figcaption
-        style={{
-          color: "rgba(226, 232, 240, 0.82)",
-          fontSize: compact ? "0.85rem" : "0.95rem",
-        }}
-      >
-        {label}
-      </figcaption>
+      {label ? (
+        <figcaption
+          style={{
+            position: compact ? "absolute" : "absolute",
+            left: compact ? "0.75rem" : "1rem",
+            bottom: compact ? "0.75rem" : "1rem",
+            color: "white",
+            fontSize: compact ? "0.78rem" : "0.92rem",
+            background: "rgba(0, 0, 0, 0.34)",
+            borderRadius: "999px",
+            padding: "0.3rem 0.55rem",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          {label}
+        </figcaption>
+      ) : null}
     </figure>
   );
 };

@@ -162,10 +162,10 @@ npm install @streamyy/client
 
 What they get:
 
-- `StreammyClient`
-- `StreammyProvider`
-- `useStreammy()`
-- `StreammyCallWidget`
+- `StreamyyClient`
+- `StreamyyProvider`
+- `useStreamyy()`
+- `StreamyyCallWidget`
 - `VideoStage`
 - ringtone configuration
 - WebRTC helper utilities
@@ -578,11 +578,11 @@ The backend package handles:
 This is the easiest frontend integration path.
 
 ```tsx
-import { StreammyCallWidget, StreammyProvider } from "@streamyy/client";
+import { StreamyyCallWidget, StreamyyProvider } from "@streamyy/client";
 
 export function CallingPage() {
   return (
-    <StreammyProvider
+    <StreamyyProvider
       options={{
         url: "http://localhost:4000",
         token: "jwt-token",
@@ -596,11 +596,11 @@ export function CallingPage() {
         reconnectionDelayMaxMs: 5000,
       }}
     >
-      <StreammyCallWidget
+      <StreamyyCallWidget
         defaultReceiverId="user_456"
         defaultCallType="video"
       />
-    </StreammyProvider>
+    </StreamyyProvider>
   );
 }
 ```
@@ -629,7 +629,7 @@ You can provide:
 ### Example using custom audio files
 
 ```tsx
-<StreammyCallWidget
+<StreamyyCallWidget
   ringtones={{
     incoming: { kind: "url", src: "/sounds/incoming.mp3" },
     outgoing: { kind: "url", src: "/sounds/outgoing.mp3" },
@@ -640,7 +640,7 @@ You can provide:
 ### Example using generated tones
 
 ```tsx
-<StreammyCallWidget
+<StreamyyCallWidget
   ringtones={{
     incoming: {
       kind: "pattern",
@@ -668,7 +668,7 @@ You can provide:
 If you want Streamyy to keep handling call state, ringing, and WebRTC, but you want your own screens, pass render functions into the widget.
 
 ```tsx
-<StreammyCallWidget
+<StreamyyCallWidget
   renderIncomingCall={({ call, accept, decline }) => (
     <MyIncomingCallSheet
       callerId={call.callerId}
@@ -697,9 +697,9 @@ If you want Streamyy to keep handling call state, ringing, and WebRTC, but you w
 If the frontend team does not want the default UI, they can use the client and build their own interface.
 
 ```ts
-import { createStreammyClient } from "@streamyy/client";
+import { createStreamyyClient } from "@streamyy/client";
 
-const client = createStreammyClient({
+const client = createStreamyyClient({
   url: "http://localhost:4000",
   token: "jwt-token",
   userId: "user_123",
@@ -731,7 +731,7 @@ client.initiateCall("user_456", "audio", {
 If the frontend team wants a custom UI but still wants package-managed state:
 
 ```tsx
-import { StreammyProvider, useStreammy } from "@streamyy/client";
+import { StreamyyProvider, useStreamyy } from "@streamyy/client";
 
 function CustomCallingUI() {
   const {
@@ -747,7 +747,7 @@ function CustomCallingUI() {
     endCall,
     toggleMute,
     toggleVideo,
-  } = useStreammy();
+  } = useStreamyy();
 
   return (
     <div>
@@ -803,9 +803,9 @@ toggleStreamTracks(localStream, "video", true);
 ### Peer connection session
 
 ```ts
-import { StreammyPeerSession } from "@streamyy/client";
+import { StreamyyPeerSession } from "@streamyy/client";
 
-const peer = new StreammyPeerSession({
+const peer = new StreamyyPeerSession({
   client,
   callId: "call_123",
   remoteUserId: "user_456",

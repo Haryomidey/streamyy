@@ -1,13 +1,13 @@
-import type { StreammyClient } from "../client.js";
+import type { StreamyyClient } from "../client.js";
 
 export interface PeerSessionOptions {
-  client: StreammyClient;
+  client: StreamyyClient;
   callId: string;
   remoteUserId: string;
   rtcConfig?: RTCConfiguration;
 }
 
-export class StreammyPeerSession {
+export class StreamyyPeerSession {
   public readonly connection: RTCPeerConnection;
 
   public constructor(private readonly options: PeerSessionOptions) {

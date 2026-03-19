@@ -1,6 +1,6 @@
 {
   "name": "@streamyy/client",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Frontend client, React hooks, UI components, and WebRTC helpers for Streamyy.",
   "license": "MIT",
   "type": "module",

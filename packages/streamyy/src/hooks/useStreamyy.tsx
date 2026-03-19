@@ -8,22 +8,22 @@ import {
   type PropsWithChildren,
 } from "react";
 import type { CallStatus, CallType } from "@streamyy/core";
-import { createStreammyClient, type StreammyClient } from "../client.js";
+import { createStreamyyClient, type StreamyyClient } from "../client.js";
 import type {
-  StreammyActiveCall,
-  StreammyCallMediaState,
-  StreammyClientOptions,
+  StreamyyActiveCall,
+  StreamyyCallMediaState,
+  StreamyyClientOptions,
 } from "../types.js";
 import { getUserMedia, toggleStreamTracks } from "../webrtc/media.js";
-import { StreammyPeerSession } from "../webrtc/peer-session.js";
+import { StreamyyPeerSession } from "../webrtc/peer-session.js";
 
-interface StreammyContextValue {
-  client: StreammyClient;
-  activeCall: StreammyActiveCall | null;
+interface StreamyyContextValue {
+  client: StreamyyClient;
+  activeCall: StreamyyActiveCall | null;
   callStatus: CallStatus | "idle";
   connected: boolean;
   reconnecting: boolean;
-  media: StreammyCallMediaState;
+  media: StreamyyCallMediaState;
   initiateCall(
     receiverId: string,
     callType: CallType,
@@ -40,7 +40,7 @@ interface StreammyContextValue {
   clearActiveCall(): void;
 }
 
-const StreammyContext = createContext<StreammyContextValue | null>(null);
+const StreamyyContext = createContext<StreamyyContextValue | null>(null);
 
 const createEmptyRemoteStream = (): MediaStream => new MediaStream();
 
@@ -54,29 +54,29 @@ const stopStream = (stream: MediaStream | null): void => {
   }
 };
 
-export const StreammyProvider = ({
+export const StreamyyProvider = ({
   options,
   children,
-}: PropsWithChildren<{ options: StreammyClientOptions }>) => {
-  const clientRef = useRef<StreammyClient | null>(null);
+}: PropsWithChildren<{ options: StreamyyClientOptions }>) => {
+  const clientRef = useRef<StreamyyClient | null>(null);
   if (!clientRef.current) {
-    clientRef.current = createStreammyClient(options);
+    clientRef.current = createStreamyyClient(options);
   }
 
   const client = clientRef.current;
   const [connected, setConnected] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
-  const [activeCall, setActiveCall] = useState<StreammyActiveCall | null>(null);
+  const [activeCall, setActiveCall] = useState<StreamyyActiveCall | null>(null);
   const [callStatus, setCallStatus] = useState<CallStatus | "idle">("idle");
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
   const [muted, setMuted] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
 
-  const activeCallRef = useRef<StreammyActiveCall | null>(null);
+  const activeCallRef = useRef<StreamyyActiveCall | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
-  const peerSessionRef = useRef<StreammyPeerSession | null>(null);
+  const peerSessionRef = useRef<StreamyyPeerSession | null>(null);
   const attachedLocalStreamRef = useRef(false);
   const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
 
@@ -117,9 +117,9 @@ export const StreammyProvider = ({
 
   const updateCallState = (
     updater:
-      | StreammyActiveCall
+      | StreamyyActiveCall
       | null
-      | ((current: StreammyActiveCall | null) => StreammyActiveCall | null),
+      | ((current: StreamyyActiveCall | null) => StreamyyActiveCall | null),
   ): void => {
     setActiveCall((current) => {
       const next = typeof updater === "function" ? updater(current) : updater;
@@ -157,14 +157,14 @@ export const StreammyProvider = ({
     return nextStream;
   };
 
-  const ensurePeerSession = (call: StreammyActiveCall): StreammyPeerSession => {
+  const ensurePeerSession = (call: StreamyyActiveCall): StreamyyPeerSession => {
     const existing = peerSessionRef.current;
     if (existing) {
       return existing;
     }
 
     const remoteUserId = call.direction === "incoming" ? call.callerId : call.receiverId;
-    const session = new StreammyPeerSession({
+    const session = new StreamyyPeerSession({
       client,
       callId: call.callId,
       remoteUserId,
@@ -202,7 +202,7 @@ export const StreammyProvider = ({
     return session;
   };
 
-  const attachLocalStream = (session: StreammyPeerSession, stream: MediaStream): void => {
+  const attachLocalStream = (session: StreamyyPeerSession, stream: MediaStream): void => {
     if (attachedLocalStreamRef.current) {
       return;
     }
@@ -211,7 +211,7 @@ export const StreammyProvider = ({
     attachedLocalStreamRef.current = true;
   };
 
-  const applyPendingOffer = async (call: StreammyActiveCall): Promise<void> => {
+  const applyPendingOffer = async (call: StreamyyActiveCall): Promise<void> => {
     const offer = pendingOfferRef.current;
     if (!offer) {
       return;
@@ -419,7 +419,7 @@ export const StreammyProvider = ({
     };
   }, [client, options.userId]);
 
-  const media = useMemo<StreammyCallMediaState>(
+  const media = useMemo<StreamyyCallMediaState>(
     () => ({
       localStream,
       remoteStream,
@@ -536,7 +536,7 @@ export const StreammyProvider = ({
     resetCallArtifacts();
   };
 
-  const value = useMemo<StreammyContextValue>(
+  const value = useMemo<StreamyyContextValue>(
     () => ({
       client,
       connected,
@@ -584,13 +584,13 @@ export const StreammyProvider = ({
     [activeCall, callStatus, client, connected, media, muted, reconnecting, videoEnabled],
   );
 
-  return <StreammyContext.Provider value={value}>{children}</StreammyContext.Provider>;
+  return <StreamyyContext.Provider value={value}>{children}</StreamyyContext.Provider>;
 };
 
-export const useStreammy = (): StreammyContextValue => {
-  const context = useContext(StreammyContext);
+export const useStreamyy = (): StreamyyContextValue => {
+  const context = useContext(StreamyyContext);
   if (!context) {
-    throw new Error("useStreammy must be used inside StreammyProvider.");
+    throw new Error("useStreamyy must be used inside StreamyyProvider.");
   }
 
   return context;

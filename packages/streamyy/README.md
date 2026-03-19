@@ -13,19 +13,19 @@ npm install @streamyy/client react react-dom socket.io-client
 ## Usage
 
 ```tsx
-import { StreammyProvider, StreammyCallWidget } from "@streamyy/client";
+import { StreamyyProvider, StreamyyCallWidget } from "@streamyy/client";
 
 export function App() {
   return (
-    <StreammyProvider
+    <StreamyyProvider
       options={{
         url: "http://localhost:3000",
         userId: "user-1",
         token: "demo-token",
       }}
     >
-      <StreammyCallWidget defaultReceiverId="user-2" />
-    </StreammyProvider>
+      <StreamyyCallWidget defaultReceiverId="user-2" />
+    </StreamyyProvider>
   );
 }
 ```
