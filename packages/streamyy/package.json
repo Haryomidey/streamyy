@@ -1,5 +1,5 @@
 {
-  "name": "streamyy",
+  "name": "@streamyy/client",
   "version": "0.1.0",
   "description": "Frontend client, React hooks, UI components, and WebRTC helpers for Streamyy.",
   "license": "MIT",
@@ -24,6 +24,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@streamyy/core": "^0.1.0",
     "react": "^19.0.0",
