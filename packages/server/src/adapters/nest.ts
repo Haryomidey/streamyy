@@ -13,8 +13,8 @@ export class StreammyModule {
           useValue: {
             service: options.service,
             notifier: options.notifier,
-            auth: options.auth,
             httpServer: options.httpServer,
+            ...(options.auth ? { auth: options.auth } : {}),
           },
         },
       ],

@@ -74,7 +74,7 @@ export const StreammyProvider = ({
           callType: call.callType,
           status: call.status,
           direction: call.callerId === options.userId ? "outgoing" : "incoming",
-          metadata: call.metadata,
+          ...(call.metadata ? { metadata: call.metadata } : {}),
         });
         setCallStatus(call.status);
       }),
@@ -147,7 +147,7 @@ export const StreammyProvider = ({
           callType,
           status: "initiated",
           direction: "outgoing",
-          metadata,
+          ...(metadata ? { metadata } : {}),
         });
         setCallStatus("initiated");
       },

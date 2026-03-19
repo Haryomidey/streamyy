@@ -116,7 +116,7 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         callerId: auth.userId,
         receiverId: String(payload.receiverId),
         callType: payload.callType === "video" ? "video" : "audio",
-        metadata: payload.metadata,
+        ...(payload.metadata !== undefined ? { metadata: payload.metadata as Record<string, unknown> } : {}),
       });
     });
 
@@ -133,7 +133,7 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         callId: String(payload.callId),
         userId: auth.userId,
         deviceId: auth.deviceId,
-        reason: typeof payload.reason === "string" ? payload.reason : undefined,
+        ...(typeof payload.reason === "string" ? { reason: payload.reason } : {}),
       });
     });
 

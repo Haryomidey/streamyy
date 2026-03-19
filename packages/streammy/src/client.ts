@@ -33,10 +33,10 @@ export class StreammyClient {
       reconnectionDelayMax: options.reconnectionDelayMaxMs ?? 5000,
       timeout: options.connectionTimeoutMs ?? 10_000,
       auth: {
-        token: options.token,
         userId: options.userId,
-        deviceId: options.deviceId,
-        metadata: options.metadata,
+        ...(options.token ? { token: options.token } : {}),
+        ...(options.deviceId ? { deviceId: options.deviceId } : {}),
+        ...(options.metadata ? { metadata: options.metadata } : {}),
       },
     });
 
@@ -64,7 +64,7 @@ export class StreammyClient {
     this.socket.emit(STREAMMY_EVENTS.callInitiate, {
       receiverId,
       callType,
-      metadata,
+      ...(metadata ? { metadata } : {}),
     });
   }
 

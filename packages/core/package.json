@@ -8,12 +8,12 @@
   "types": "./dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/streamyy.git",
+    "url": "https://github.com/Haryomidey/streamyy.git",
     "directory": "packages/core"
   },
-  "homepage": "https://github.com/your-org/streamyy#readme",
+  "homepage": "https://github.com/Haryomidey/streamyy#readme",
   "bugs": {
-    "url": "https://github.com/your-org/streamyy/issues"
+    "url": "https://github.com/Haryomidey/streamyy/issues"
   },
   "exports": {
     ".": {

@@ -31,7 +31,7 @@ export const registerExpressStreammyRoutes = (
         callerId: String(request.body?.callerId),
         receiverId: String(request.body?.receiverId),
         callType: request.body?.callType === "video" ? "video" : "audio",
-        metadata: request.body?.metadata,
+        ...(request.body?.metadata !== undefined ? { metadata: request.body.metadata } : {}),
       });
 
       response.status(201).json(session);
@@ -44,7 +44,7 @@ export const registerExpressStreammyRoutes = (
       const session = await options.service.endCall({
         callId: String(request.params?.callId),
         userId: String(request.body?.userId),
-        deviceId: typeof request.body?.deviceId === "string" ? request.body.deviceId : undefined,
+        ...(typeof request.body?.deviceId === "string" ? { deviceId: request.body.deviceId } : {}),
       });
 
       response.status(200).json(session);

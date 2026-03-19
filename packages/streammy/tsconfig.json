@@ -1,20 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "rootDir": "./src",
     "outDir": "./dist",
     "composite": true,
     "jsx": "react-jsx",
-    "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "paths": {
-      "@streammy/core": [
-        "../core/src/index.ts"
-      ]
-    }
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx"
+  ],
+  "references": [
+    {
+      "path": "../core"
+    }
   ]
 }

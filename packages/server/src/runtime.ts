@@ -33,7 +33,7 @@ export const createStreammyRuntime = (options: CreateStreammyRuntimeOptions): St
     presence: persistence.presence,
     connections: persistence.connections,
     notifier,
-    ringingTimeoutMs: options.ringingTimeoutMs,
+    ...(options.ringingTimeoutMs !== undefined ? { ringingTimeoutMs: options.ringingTimeoutMs } : {}),
   });
 
   return {
@@ -43,8 +43,8 @@ export const createStreammyRuntime = (options: CreateStreammyRuntimeOptions): St
     bind(): void {
       bindSocketIoServer({
         io,
-        auth: options.auth,
         service,
+        ...(options.auth ? { auth: options.auth } : {}),
       });
     },
   };
