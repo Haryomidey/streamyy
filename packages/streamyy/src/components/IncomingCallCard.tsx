@@ -6,51 +6,74 @@ export interface IncomingCallCardProps {
   onDecline(): void;
 }
 
+const avatarStyle: Record<string, unknown> = {
+  width: "4.75rem",
+  height: "4.75rem",
+  borderRadius: "999px",
+  display: "grid",
+  placeItems: "center",
+  background: "linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(16, 185, 129, 0.16))",
+  border: "1px solid rgba(134, 239, 172, 0.24)",
+  color: "#dcfce7",
+  fontSize: "1.4rem",
+  fontWeight: 700,
+};
+
 export const IncomingCallCard = ({ call, onAccept, onDecline }: IncomingCallCardProps) => {
   return (
     <section
       style={{
-        padding: "1rem",
-        borderRadius: "1rem",
-        border: "1px solid rgba(125, 211, 252, 0.2)",
+        padding: "1.35rem",
+        borderRadius: "1.6rem",
+        border: "1px solid rgba(255, 255, 255, 0.08)",
         display: "grid",
-        gap: "0.75rem",
-        maxWidth: "22rem",
-        background: "rgba(2, 6, 23, 0.65)",
+        gap: "1rem",
+        background: "linear-gradient(180deg, rgba(17, 24, 39, 0.92), rgba(3, 7, 18, 0.96))",
+        color: "white",
       }}
     >
-      <div>
-        <strong>Incoming {call.callType} call</strong>
-        <p style={{ margin: "0.25rem 0 0", color: "rgba(226, 232, 240, 0.78)" }}>Caller: {call.callerId}</p>
+      <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+        <div style={avatarStyle}>{call.callerId.slice(0, 2).toUpperCase()}</div>
+        <div style={{ display: "grid", gap: "0.25rem" }}>
+          <strong style={{ fontSize: "1.15rem" }}>{call.callerId}</strong>
+          <span style={{ color: "rgba(226, 232, 240, 0.74)" }}>
+            Incoming {call.callType} call
+          </span>
+        </div>
       </div>
-      <div style={{ display: "flex", gap: "0.75rem" }}>
-        <button
-          type="button"
-          onClick={onAccept}
-          style={{
-            borderRadius: "12px",
-            border: 0,
-            padding: "0.75rem 1rem",
-            background: "#16a34a",
-            color: "white",
-            fontWeight: 700,
-          }}
-        >
-          Accept
-        </button>
+
+      <div style={{ display: "flex", gap: "0.9rem", justifyContent: "center" }}>
         <button
           type="button"
           onClick={onDecline}
           style={{
-            borderRadius: "12px",
+            width: "4rem",
+            height: "4rem",
+            borderRadius: "999px",
             border: 0,
-            padding: "0.75rem 1rem",
-            background: "#dc2626",
+            background: "#ef4444",
             color: "white",
             fontWeight: 700,
+            cursor: "pointer",
           }}
         >
-          Decline
+          End
+        </button>
+        <button
+          type="button"
+          onClick={onAccept}
+          style={{
+            width: "4rem",
+            height: "4rem",
+            borderRadius: "999px",
+            border: 0,
+            background: "#22c55e",
+            color: "white",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Pick
         </button>
       </div>
     </section>

@@ -1,9 +1,14 @@
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { CallControls } from "./CallControls.js";
 import { IncomingCallCard } from "./IncomingCallCard.js";
+import { VideoStage } from "./VideoStage.js";
 import { useRingtone } from "../hooks/useRingtone.js";
 import { useStreammy } from "../hooks/useStreammy.js";
-import type { CallControlsState, StreammyRingtoneSet } from "../types.js";
+import type {
+  StreammyCallInterfaceRenderer,
+  StreammyIncomingCallRenderer,
+  StreammyRingtoneSet,
+} from "../types.js";
 
 export interface StreammyCallWidgetProps {
   defaultReceiverId?: string;
@@ -11,14 +16,16 @@ export interface StreammyCallWidgetProps {
   title?: string;
   subtitle?: string;
   ringtones?: StreammyRingtoneSet;
+  renderIncomingCall?: StreammyIncomingCallRenderer;
+  renderCallInterface?: StreammyCallInterfaceRenderer;
 }
 
 const statusLabel: Record<string, string> = {
-  idle: "Idle",
-  initiated: "Dialing",
+  idle: "Ready",
+  initiated: "Calling",
   ringing: "Ringing",
-  accepted: "Accepted",
-  ongoing: "Live",
+  accepted: "Connecting",
+  ongoing: "In call",
   declined: "Declined",
   cancelled: "Cancelled",
   ended: "Ended",
@@ -26,273 +33,364 @@ const statusLabel: Record<string, string> = {
   missed: "Missed",
 };
 
-const surface: CSSProperties = {
-  borderRadius: "28px",
-  border: "1px solid rgba(148, 163, 184, 0.18)",
+const shellStyle: CSSProperties = {
+  borderRadius: "2rem",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
   background:
-    "radial-gradient(circle at top, rgba(30, 64, 175, 0.22), transparent 38%), rgba(2, 6, 23, 0.92)",
-  boxShadow: "0 24px 80px rgba(2, 6, 23, 0.45)",
+    "radial-gradient(circle at top, rgba(34, 197, 94, 0.14), transparent 26%), linear-gradient(180deg, #182229 0%, #0b141a 100%)",
   color: "white",
+  boxShadow: "0 30px 80px rgba(0, 0, 0, 0.28)",
+};
+
+const fieldStyle: CSSProperties = {
+  width: "100%",
+  borderRadius: "1rem",
+  border: "1px solid rgba(255, 255, 255, 0.08)",
+  background: "rgba(255, 255, 255, 0.06)",
+  color: "white",
+  padding: "0.95rem 1rem",
+  boxSizing: "border-box",
+};
+
+const actionButton = (background: string): CSSProperties => ({
+  borderRadius: "1rem",
+  border: 0,
+  padding: "0.95rem 1rem",
+  background,
+  color: "white",
+  fontWeight: 700,
+  cursor: "pointer",
+});
+
+const finishedStatuses = new Set(["ended", "declined", "cancelled", "missed", "failed"]);
+
+const avatarText = (value: string): string => value.slice(0, 2).toUpperCase() || "?";
+
+const RemoteAudio = ({ stream }: { stream: MediaStream | null }) => {
+  const ref = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.srcObject = stream;
+    }
+  }, [stream]);
+
+  return <audio ref={ref} autoPlay playsInline />;
 };
 
 export const StreammyCallWidget = ({
   defaultReceiverId = "",
   defaultCallType = "video",
-  title = "Streamyy Calling UI",
-  subtitle = "Default install-ready calling experience with signaling state, ringing, and customizable ringtones.",
+  title = "Streamyy Calling",
+  subtitle = "Drop this in for a ready-made calling experience, or keep the hook actions and replace the screens with your own design.",
   ringtones,
+  renderIncomingCall,
+  renderCallInterface,
 }: StreammyCallWidgetProps) => {
-  const { activeCall, callStatus, connected, reconnecting, initiateCall, acceptCall, declineCall, cancelCall, endCall, clearActiveCall } =
-    useStreammy();
+  const {
+    activeCall,
+    callStatus,
+    connected,
+    reconnecting,
+    media,
+    startAudioCall,
+    startVideoCall,
+    acceptCall,
+    declineCall,
+    cancelCall,
+    endCall,
+    toggleMute,
+    toggleVideo,
+    clearActiveCall,
+  } = useStreammy();
   const [receiverId, setReceiverId] = useState(defaultReceiverId);
-  const [callType, setCallType] = useState<"audio" | "video">(defaultCallType);
-  const [controls, setControls] = useState<CallControlsState>({
-    muted: false,
-    videoEnabled: defaultCallType === "video",
-  });
+  const [selectedType, setSelectedType] = useState<"audio" | "video">(defaultCallType);
 
   const isIncomingRinging =
-    activeCall?.direction === "incoming" && (activeCall.status === "ringing" || activeCall.status === "initiated");
+    activeCall?.direction === "incoming" &&
+    (activeCall.status === "ringing" || activeCall.status === "initiated");
   const isOutgoingRinging =
     activeCall?.direction === "outgoing" && (callStatus === "initiated" || callStatus === "ringing");
+  const isFinished = activeCall ? finishedStatuses.has(callStatus) : false;
 
   useRingtone(Boolean(isIncomingRinging), ringtones?.incoming, "incoming");
   useRingtone(Boolean(isOutgoingRinging), ringtones?.outgoing, "outgoing");
 
-  const canStartCall =
-    receiverId.trim().length > 0 &&
-    (callStatus === "idle" ||
-      callStatus === "ended" ||
-      callStatus === "declined" ||
-      callStatus === "cancelled" ||
-      callStatus === "missed" ||
-      callStatus === "failed");
   const liveLabel = useMemo(() => statusLabel[callStatus] ?? callStatus, [callStatus]);
 
-  return (
-    <section style={{ ...surface, padding: "1.5rem", display: "grid", gap: "1.25rem" }}>
-      <header style={{ display: "grid", gap: "0.4rem" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: "1.6rem", fontWeight: 800 }}>{title}</h2>
-            <p style={{ margin: "0.35rem 0 0", color: "rgba(226, 232, 240, 0.72)", lineHeight: 1.6 }}>{subtitle}</p>
-          </div>
-          <span
-            style={{
-              borderRadius: "999px",
-              padding: "0.4rem 0.8rem",
-              background: reconnecting
-                ? "rgba(245, 158, 11, 0.16)"
-                : connected
-                  ? "rgba(34, 197, 94, 0.16)"
-                  : "rgba(248, 113, 113, 0.14)",
-              color: reconnecting ? "#fcd34d" : connected ? "#86efac" : "#fca5a5",
-              fontSize: "0.9rem",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {reconnecting ? "Reconnecting" : connected ? "Connected" : "Disconnected"}
-          </span>
-        </div>
-      </header>
+  const startSelectedCall = async (): Promise<void> => {
+    const target = receiverId.trim();
+    if (!target) {
+      return;
+    }
 
-      <section
-        style={{
-          display: "grid",
-          gap: "1rem",
-          gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+    if (selectedType === "audio") {
+      await startAudioCall(target, { startedFrom: "streamyy-default-ui" });
+      return;
+    }
+
+    await startVideoCall(target, { startedFrom: "streamyy-default-ui" });
+  };
+
+  const endCurrentCall = async (): Promise<void> => {
+    if (!activeCall) {
+      return;
+    }
+
+    if (activeCall.direction === "outgoing" && (callStatus === "initiated" || callStatus === "ringing")) {
+      await cancelCall(activeCall.callId);
+      return;
+    }
+
+    await endCall(activeCall.callId);
+  };
+
+  const defaultIncomingUi =
+    activeCall && isIncomingRinging ? (
+      <IncomingCallCard
+        call={activeCall}
+        onAccept={() => {
+          void acceptCall(activeCall.callId);
         }}
-      >
-        <article
+        onDecline={() => {
+          void declineCall(activeCall.callId);
+        }}
+      />
+    ) : null;
+
+  const callRendererProps =
+    activeCall === null
+      ? null
+      : {
+          activeCall,
+          callStatus,
+          connected,
+          reconnecting,
+          media,
+          clear: clearActiveCall,
+          cancel: async () => cancelCall(activeCall.callId),
+          end: async () => endCall(activeCall.callId),
+          toggleMute,
+          toggleVideo,
+        };
+
+  const audioFallbackLabel =
+    activeCall?.direction === "incoming" ? activeCall.callerId : activeCall?.receiverId ?? "Remote";
+
+  return (
+    <section style={{ ...shellStyle, padding: "1.35rem", display: "grid", gap: "1.2rem" }}>
+      <header style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "start" }}>
+        <div style={{ display: "grid", gap: "0.35rem" }}>
+          <h2 style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800 }}>{title}</h2>
+          <p style={{ margin: 0, color: "rgba(226, 232, 240, 0.72)", lineHeight: 1.6 }}>{subtitle}</p>
+        </div>
+        <span
           style={{
-            padding: "1rem",
-            borderRadius: "22px",
-            border: "1px solid rgba(148, 163, 184, 0.14)",
-            background: "rgba(15, 23, 42, 0.75)",
-            display: "grid",
-            gap: "0.85rem",
+            borderRadius: "999px",
+            padding: "0.45rem 0.8rem",
+            background: reconnecting
+              ? "rgba(245, 158, 11, 0.16)"
+              : connected
+                ? "rgba(34, 197, 94, 0.16)"
+                : "rgba(239, 68, 68, 0.18)",
+            color: reconnecting ? "#fcd34d" : connected ? "#86efac" : "#fca5a5",
+            fontSize: "0.88rem",
+            whiteSpace: "nowrap",
           }}
         >
-          <div>
-            <p style={{ margin: 0, fontSize: "0.85rem", color: "rgba(125, 211, 252, 0.85)", textTransform: "uppercase", letterSpacing: "0.18em" }}>
-              Start Call
-            </p>
-            <h3 style={{ margin: "0.45rem 0 0", fontSize: "1.1rem" }}>Launch the default widget</h3>
-            <p style={{ margin: "0.45rem 0 0", color: "rgba(226, 232, 240, 0.72)", lineHeight: 1.6 }}>
-              Calls ring for up to 60 seconds. If nobody picks, the session automatically ends as missed to keep the flow light.
-            </p>
+          {reconnecting ? "Reconnecting" : connected ? "Connected" : "Disconnected"}
+        </span>
+      </header>
+
+      {!activeCall ? (
+        <section
+          style={{
+            display: "grid",
+            gap: "1rem",
+            padding: "1.2rem",
+            borderRadius: "1.5rem",
+            background: "rgba(255, 255, 255, 0.04)",
+            border: "1px solid rgba(255, 255, 255, 0.06)",
+          }}
+        >
+          <div style={{ display: "grid", gap: "0.45rem" }}>
+            <span style={{ fontSize: "0.82rem", letterSpacing: "0.16em", textTransform: "uppercase", color: "#86efac" }}>
+              Start a call
+            </span>
+            <strong style={{ fontSize: "1.15rem" }}>
+              Your app can also call `startAudioCall(...)` or `startVideoCall(...)` from its own buttons.
+            </strong>
           </div>
 
-          <label style={{ display: "grid", gap: "0.45rem" }}>
-            <span style={{ fontSize: "0.92rem", color: "rgba(226, 232, 240, 0.82)" }}>Receiver ID</span>
-            <input
-              value={receiverId}
-              onChange={(event: { target: { value: string } }) => setReceiverId(event.target.value)}
-              placeholder="user_456"
-              style={{
-                borderRadius: "14px",
-                border: "1px solid rgba(148, 163, 184, 0.18)",
-                background: "rgba(15, 23, 42, 0.65)",
-                color: "white",
-                padding: "0.85rem 0.9rem",
-              }}
-            />
-          </label>
+          <input
+            value={receiverId}
+            onChange={(event: { target: { value: string } }) => setReceiverId(event.target.value)}
+            placeholder="receiver_user_id"
+            style={fieldStyle}
+          />
 
-          <div style={{ display: "flex", gap: "0.75rem" }}>
+          <div style={{ display: "grid", gap: "0.8rem", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
             <button
               type="button"
-              onClick={() => setCallType("audio")}
-              style={{
-                flex: 1,
-                borderRadius: "14px",
-                border: 0,
-                padding: "0.8rem 1rem",
-                background: callType === "audio" ? "#0ea5e9" : "rgba(30, 41, 59, 0.85)",
-                color: "white",
+              onClick={() => {
+                setSelectedType("audio");
+                void startAudioCall(receiverId.trim(), { startedFrom: "streamyy-default-ui" });
               }}
+              style={actionButton(selectedType === "audio" ? "#1f8f5f" : "rgba(255, 255, 255, 0.08)")}
             >
-              Audio
+              Audio call
             </button>
             <button
               type="button"
-              onClick={() => setCallType("video")}
-              style={{
-                flex: 1,
-                borderRadius: "14px",
-                border: 0,
-                padding: "0.8rem 1rem",
-                background: callType === "video" ? "#0ea5e9" : "rgba(30, 41, 59, 0.85)",
-                color: "white",
+              onClick={() => {
+                setSelectedType("video");
+                void startVideoCall(receiverId.trim(), { startedFrom: "streamyy-default-ui" });
               }}
+              style={actionButton(selectedType === "video" ? "#128c7e" : "rgba(255, 255, 255, 0.08)")}
             >
-              Video
+              Video call
             </button>
           </div>
 
           <button
             type="button"
-            disabled={!canStartCall}
-            onClick={() => initiateCall(receiverId.trim(), callType, { startedFrom: "streamyy-default-ui" })}
-            style={{
-              borderRadius: "16px",
-              border: 0,
-              padding: "0.95rem 1rem",
-              background: canStartCall ? "linear-gradient(135deg, #0ea5e9, #2563eb)" : "rgba(71, 85, 105, 0.6)",
-              color: "white",
-              fontWeight: 700,
-              cursor: canStartCall ? "pointer" : "not-allowed",
+            onClick={() => {
+              void startSelectedCall();
             }}
+            style={actionButton("linear-gradient(135deg, #25d366, #128c7e)")}
           >
-            Start {callType} call
+            Start with selected type
           </button>
-        </article>
+        </section>
+      ) : null}
 
-        <article
-          style={{
-            padding: "1rem",
-            borderRadius: "22px",
-            border: "1px solid rgba(148, 163, 184, 0.14)",
-            background: "rgba(15, 23, 42, 0.75)",
-            display: "grid",
-            gap: "0.85rem",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "center" }}>
-            <div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "rgba(125, 211, 252, 0.85)", textTransform: "uppercase", letterSpacing: "0.18em" }}>
-                Current State
-              </p>
-              <h3 style={{ margin: "0.45rem 0 0", fontSize: "1.1rem" }}>{liveLabel}</h3>
-            </div>
-            <span
+      {activeCall && isIncomingRinging
+        ? renderIncomingCall
+          ? renderIncomingCall({
+              call: activeCall,
+              connected,
+              reconnecting,
+              accept: async () => acceptCall(activeCall.callId),
+              decline: async (reason?: string) => declineCall(activeCall.callId, reason),
+            })
+          : defaultIncomingUi
+        : null}
+
+      {activeCall && !isIncomingRinging
+        ? renderCallInterface && callRendererProps
+          ? renderCallInterface(callRendererProps)
+          : (
+            <section
               style={{
-                borderRadius: "999px",
-                padding: "0.35rem 0.75rem",
-                background: "rgba(14, 165, 233, 0.14)",
-                color: "#7dd3fc",
-                fontSize: "0.88rem",
+                display: "grid",
+                gap: "1rem",
+                padding: "1rem",
+                borderRadius: "1.6rem",
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(255, 255, 255, 0.06)",
               }}
             >
-              {activeCall?.direction ?? "standby"}
-            </span>
-          </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+                <div style={{ display: "flex", gap: "0.9rem", alignItems: "center" }}>
+                  <div
+                    style={{
+                      width: "3.5rem",
+                      height: "3.5rem",
+                      borderRadius: "999px",
+                      display: "grid",
+                      placeItems: "center",
+                      background: "rgba(37, 211, 102, 0.18)",
+                      color: "#dcfce7",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {avatarText(audioFallbackLabel)}
+                  </div>
+                  <div style={{ display: "grid", gap: "0.2rem" }}>
+                    <strong style={{ fontSize: "1.05rem" }}>{audioFallbackLabel}</strong>
+                    <span style={{ color: "rgba(226, 232, 240, 0.72)" }}>
+                      {activeCall.callType} call • {liveLabel}
+                    </span>
+                  </div>
+                </div>
 
-          {activeCall ? (
-            <div style={{ display: "grid", gap: "0.45rem", color: "rgba(226, 232, 240, 0.86)" }}>
-              <p style={{ margin: 0 }}>Call ID: {activeCall.callId}</p>
-              <p style={{ margin: 0 }}>Caller: {activeCall.callerId}</p>
-              <p style={{ margin: 0 }}>Receiver: {activeCall.receiverId}</p>
-              <p style={{ margin: 0 }}>Type: {activeCall.callType}</p>
-            </div>
-          ) : (
-            <p style={{ margin: 0, color: "rgba(226, 232, 240, 0.72)", lineHeight: 1.6 }}>
-              No active session yet. This widget becomes the default installable UI developers can use before customizing.
-            </p>
-          )}
+                {isFinished ? (
+                  <button
+                    type="button"
+                    onClick={clearActiveCall}
+                    style={{
+                      ...actionButton("rgba(255, 255, 255, 0.08)"),
+                      padding: "0.7rem 0.9rem",
+                    }}
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </div>
 
-          {activeCall?.direction === "incoming" && (activeCall.status === "ringing" || activeCall.status === "initiated") ? (
-            <IncomingCallCard
-              call={activeCall}
-              onAccept={() => acceptCall(activeCall.callId)}
-              onDecline={() => declineCall(activeCall.callId)}
-            />
-          ) : null}
+              {activeCall.callType === "video" ? (
+                <VideoStage
+                  localStream={media.localStream}
+                  remoteStream={media.remoteStream}
+                  localLabel="You"
+                  remoteLabel={audioFallbackLabel}
+                  localMirrored
+                />
+              ) : (
+                <section
+                  style={{
+                    minHeight: "18rem",
+                    borderRadius: "1.6rem",
+                    background:
+                      "radial-gradient(circle at top, rgba(37, 211, 102, 0.18), transparent 32%), linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(2, 6, 23, 0.96))",
+                    display: "grid",
+                    placeItems: "center",
+                    textAlign: "center",
+                    padding: "1.5rem",
+                  }}
+                >
+                  <div style={{ display: "grid", gap: "1rem", placeItems: "center" }}>
+                    <div
+                      style={{
+                        width: "6.5rem",
+                        height: "6.5rem",
+                        borderRadius: "999px",
+                        display: "grid",
+                        placeItems: "center",
+                        background: "rgba(37, 211, 102, 0.16)",
+                        border: "1px solid rgba(74, 222, 128, 0.18)",
+                        fontSize: "2rem",
+                        fontWeight: 800,
+                        color: "#dcfce7",
+                      }}
+                    >
+                      {avatarText(audioFallbackLabel)}
+                    </div>
+                    <div style={{ display: "grid", gap: "0.35rem" }}>
+                      <strong style={{ fontSize: "1.35rem" }}>{audioFallbackLabel}</strong>
+                      <span style={{ color: "rgba(226, 232, 240, 0.72)" }}>{liveLabel}</span>
+                    </div>
+                  </div>
+                </section>
+              )}
 
-          {activeCall ? (
-            <CallControls
-              state={controls}
-              onToggleMute={() =>
-                setControls((current) => ({
-                  ...current,
-                  muted: !current.muted,
-                }))
-              }
-              onToggleVideo={() =>
-                setControls((current) => ({
-                  ...current,
-                  videoEnabled: !current.videoEnabled,
-                }))
-              }
-              onHangup={() => {
-                if (activeCall.callId.startsWith("pending-")) {
-                  clearActiveCall();
-                  return;
-                }
+              <CallControls
+                state={{
+                  muted: media.muted,
+                  videoEnabled: media.videoEnabled,
+                }}
+                showVideoToggle={activeCall.callType === "video" && media.hasLocalVideo}
+                onToggleMute={() => toggleMute()}
+                onToggleVideo={() => toggleVideo()}
+                onHangup={() => {
+                  void endCurrentCall();
+                }}
+              />
+            </section>
+            )
+        : null}
 
-                if (activeCall.direction === "outgoing" && (activeCall.status === "initiated" || activeCall.status === "ringing")) {
-                  cancelCall(activeCall.callId);
-                  return;
-                }
-
-                endCall(activeCall.callId);
-              }}
-            />
-          ) : null}
-
-          {(callStatus === "ended" ||
-            callStatus === "declined" ||
-            callStatus === "cancelled" ||
-            callStatus === "missed" ||
-            callStatus === "failed") &&
-          activeCall ? (
-            <button
-              type="button"
-              onClick={clearActiveCall}
-              style={{
-                justifySelf: "start",
-                borderRadius: "12px",
-                border: "1px solid rgba(148, 163, 184, 0.18)",
-                background: "transparent",
-                color: "white",
-                padding: "0.7rem 0.9rem",
-              }}
-            >
-              Clear finished call
-            </button>
-          ) : null}
-        </article>
-      </section>
+      {media.remoteStream ? <RemoteAudio stream={media.remoteStream} /> : null}
     </section>
   );
 };

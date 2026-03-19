@@ -18,9 +18,11 @@ import { StreammyProvider, StreammyCallWidget } from "@streamyy/client";
 export function App() {
   return (
     <StreammyProvider
-      url="http://localhost:3000"
-      userId="user-1"
-      token="demo-token"
+      options={{
+        url: "http://localhost:3000",
+        userId: "user-1",
+        token: "demo-token",
+      }}
     >
       <StreammyCallWidget defaultReceiverId="user-2" />
     </StreammyProvider>
@@ -33,6 +35,8 @@ export function App() {
 - signaling client
 - React provider and hook
 - default calling widget
+- start-audio and start-video hook actions for custom buttons
+- customizable incoming-call and active-call screens
 - ringtone helpers
 - video layout helpers
 - WebRTC peer session helpers

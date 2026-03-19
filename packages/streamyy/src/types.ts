@@ -1,4 +1,5 @@
 import type { CallSessionRecord, CallType, PresenceRecord } from "@streamyy/core";
+import type { ReactNode } from "react";
 
 export interface StreammyClientOptions {
   url: string;
@@ -116,3 +117,42 @@ export interface StreammyRingtoneSet {
   incoming?: StreammyRingtoneSource;
   outgoing?: StreammyRingtoneSource;
 }
+
+export interface StreammyCallMediaState {
+  localStream: MediaStream | null;
+  remoteStream: MediaStream | null;
+  muted: boolean;
+  videoEnabled: boolean;
+  hasLocalAudio: boolean;
+  hasLocalVideo: boolean;
+  hasRemoteVideo: boolean;
+}
+
+export interface StreammyIncomingCallRenderProps {
+  call: StreammyActiveCall;
+  connected: boolean;
+  reconnecting: boolean;
+  accept(): Promise<void>;
+  decline(reason?: string): Promise<void>;
+}
+
+export interface StreammyCallInterfaceRenderProps {
+  activeCall: StreammyActiveCall;
+  callStatus: CallSessionRecord["status"] | "idle";
+  connected: boolean;
+  reconnecting: boolean;
+  media: StreammyCallMediaState;
+  clear(): void;
+  cancel(): Promise<void>;
+  end(): Promise<void>;
+  toggleMute(nextMuted?: boolean): void;
+  toggleVideo(nextEnabled?: boolean): void;
+}
+
+export type StreammyIncomingCallRenderer = (
+  props: StreammyIncomingCallRenderProps,
+) => ReactNode;
+
+export type StreammyCallInterfaceRenderer = (
+  props: StreammyCallInterfaceRenderProps,
+) => ReactNode;

@@ -608,13 +608,14 @@ export function CallingPage() {
 What the default UI gives you:
 
 - start call form
-- current call state
+- WhatsApp-style default in-call layout
+- real local and remote media rendering
 - incoming call accept/decline panel
-- mute and video toggles
+- working mute and camera toggles
 - end-call action
 - reconnect status
 - built-in ringtone behavior
-- non-mirrored video by default
+- custom incoming-call and active-call render overrides
 
 ## 2. Customize ringtones
 
@@ -662,7 +663,36 @@ You can provide:
 />
 ```
 
-## 3. Use the client directly
+## 3. Customize the incoming and in-call UI
+
+If you want Streamyy to keep handling call state, ringing, and WebRTC, but you want your own screens, pass render functions into the widget.
+
+```tsx
+<StreammyCallWidget
+  renderIncomingCall={({ call, accept, decline }) => (
+    <MyIncomingCallSheet
+      callerId={call.callerId}
+      type={call.callType}
+      onAccept={accept}
+      onDecline={decline}
+    />
+  )}
+  renderCallInterface={({ activeCall, media, toggleMute, toggleVideo, end }) => (
+    <MyCallScreen
+      call={activeCall}
+      localStream={media.localStream}
+      remoteStream={media.remoteStream}
+      muted={media.muted}
+      videoEnabled={media.videoEnabled}
+      onToggleMute={toggleMute}
+      onToggleVideo={toggleVideo}
+      onEnd={end}
+    />
+  )}
+/>
+```
+
+## 4. Use the client directly
 
 If the frontend team does not want the default UI, they can use the client and build their own interface.
 
@@ -696,7 +726,7 @@ client.initiateCall("user_456", "audio", {
 });
 ```
 
-## 4. Use the React hook
+## 5. Use the React hook
 
 If the frontend team wants a custom UI but still wants package-managed state:
 
@@ -709,10 +739,14 @@ function CustomCallingUI() {
     reconnecting,
     activeCall,
     callStatus,
-    initiateCall,
+    media,
+    startAudioCall,
+    startVideoCall,
     acceptCall,
     declineCall,
     endCall,
+    toggleMute,
+    toggleVideo,
   } = useStreammy();
 
   return (
@@ -721,26 +755,34 @@ function CustomCallingUI() {
       <p>Reconnecting: {String(reconnecting)}</p>
       <p>Status: {callStatus}</p>
 
-      <button onClick={() => initiateCall("user_456", "video")}>
-        Start call
+      <button onClick={() => void startAudioCall("user_456")}>
+        Start audio call
+      </button>
+
+      <button onClick={() => void startVideoCall("user_456")}>
+        Start video call
       </button>
 
       {activeCall?.direction === "incoming" ? (
         <div>
-          <button onClick={() => acceptCall(activeCall.callId)}>Accept</button>
-          <button onClick={() => declineCall(activeCall.callId)}>Decline</button>
+          <button onClick={() => void acceptCall(activeCall.callId)}>Accept</button>
+          <button onClick={() => void declineCall(activeCall.callId)}>Decline</button>
         </div>
       ) : null}
 
       {activeCall ? (
-        <button onClick={() => endCall(activeCall.callId)}>End</button>
+        <>
+          <button onClick={() => toggleMute()}>{media.muted ? "Unmute" : "Mute"}</button>
+          <button onClick={() => toggleVideo()}>{media.videoEnabled ? "Stop video" : "Start video"}</button>
+          <button onClick={() => void endCall(activeCall.callId)}>End</button>
+        </>
       ) : null}
     </div>
   );
 }
 ```
 
-## 5. WebRTC helpers
+## 6. WebRTC helpers
 
 The frontend package also exports helper utilities.
 
@@ -775,7 +817,7 @@ const offer = await peer.createOffer();
 client.sendOffer("call_123", "user_456", offer);
 ```
 
-## 6. WhatsApp-style video swap layout
+## 7. WhatsApp-style video swap layout
 
 If the frontend team wants the common calling layout where:
 
