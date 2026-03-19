@@ -121,7 +121,7 @@ Use it when you want:
 - 60-second ringing timeout by default
 - persistence-agnostic backend setup
 
-### `streammy`
+### `streamyy`
 
 Frontend package developers install.
 
@@ -157,7 +157,7 @@ What they get:
 Install:
 
 ```bash
-npm install streammy
+npm install streamyy
 ```
 
 What they get:
@@ -578,7 +578,7 @@ The backend package handles:
 This is the easiest frontend integration path.
 
 ```tsx
-import { StreammyCallWidget, StreammyProvider } from "streammy";
+import { StreammyCallWidget, StreammyProvider } from "streamyy";
 
 export function CallingPage() {
   return (
@@ -667,7 +667,7 @@ You can provide:
 If the frontend team does not want the default UI, they can use the client and build their own interface.
 
 ```ts
-import { createStreammyClient } from "streammy";
+import { createStreammyClient } from "streamyy";
 
 const client = createStreammyClient({
   url: "http://localhost:4000",
@@ -701,7 +701,7 @@ client.initiateCall("user_456", "audio", {
 If the frontend team wants a custom UI but still wants package-managed state:
 
 ```tsx
-import { StreammyProvider, useStreammy } from "streammy";
+import { StreammyProvider, useStreammy } from "streamyy";
 
 function CustomCallingUI() {
   const {
@@ -747,7 +747,7 @@ The frontend package also exports helper utilities.
 ### Local media
 
 ```ts
-import { getUserMedia, toggleStreamTracks } from "streammy";
+import { getUserMedia, toggleStreamTracks } from "streamyy";
 
 const localStream = await getUserMedia({
   audio: true,
@@ -761,7 +761,7 @@ toggleStreamTracks(localStream, "video", true);
 ### Peer connection session
 
 ```ts
-import { StreammyPeerSession } from "streammy";
+import { StreammyPeerSession } from "streamyy";
 
 const peer = new StreammyPeerSession({
   client,
@@ -786,7 +786,7 @@ If the frontend team wants the common calling layout where:
 they can use `VideoStage`.
 
 ```tsx
-import { VideoStage } from "streammy";
+import { VideoStage } from "streamyy";
 
 <VideoStage
   localStream={localStream}
@@ -814,7 +814,7 @@ That means when a user moves left, the video also moves left on screen.
 If a frontend team wants selfie-style preview behavior, they can opt in:
 
 ```tsx
-import { VideoTile } from "streammy";
+import { VideoTile } from "streamyy";
 
 <VideoTile
   stream={localStream}

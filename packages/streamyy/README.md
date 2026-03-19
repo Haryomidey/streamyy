@@ -1,4 +1,4 @@
-# streammy
+# streamyy
 
 Frontend client package for Streamyy.
 
@@ -7,13 +7,13 @@ It includes the Socket.IO signaling client, React hooks, install-ready UI compon
 ## Install
 
 ```bash
-npm install streammy react react-dom socket.io-client
+npm install streamyy react react-dom socket.io-client
 ```
 
 ## Usage
 
 ```tsx
-import { StreammyProvider, StreammyCallWidget } from "streammy";
+import { StreammyProvider, StreammyCallWidget } from "streamyy";
 
 export function App() {
   return (

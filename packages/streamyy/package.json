@@ -1,5 +1,5 @@
 {
-  "name": "streammy",
+  "name": "streamyy",
   "version": "0.1.0",
   "description": "Frontend client, React hooks, UI components, and WebRTC helpers for Streamyy.",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Haryomidey/streamyy.git",
-    "directory": "packages/streammy"
+    "directory": "packages/streamyy"
   },
   "homepage": "https://github.com/Haryomidey/streamyy#readme",
   "bugs": {

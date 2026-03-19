@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "npm run build:packages",
-    "build:packages": "tsc -b packages/core packages/mongoose packages/prisma packages/postgres packages/redis packages/supabase packages/dynamodb packages/server packages/streammy",
+    "build:packages": "tsc -b packages/core packages/mongoose packages/prisma packages/postgres packages/redis packages/supabase packages/dynamodb packages/server packages/streamyy",
     "build:core": "tsc -b packages/core",
     "build:mongoose": "tsc -b packages/mongoose",
     "build:prisma": "tsc -b packages/prisma",
@@ -17,8 +17,8 @@
     "build:supabase": "tsc -b packages/supabase",
     "build:dynamodb": "tsc -b packages/dynamodb",
     "build:server": "tsc -b packages/server",
-    "build:frontend": "tsc -b packages/streammy",
-    "typecheck": "tsc -b --pretty false packages/core packages/mongoose packages/prisma packages/postgres packages/redis packages/supabase packages/dynamodb packages/server packages/streammy",
+    "build:frontend": "tsc -b packages/streamyy",
+    "typecheck": "tsc -b --pretty false packages/core packages/mongoose packages/prisma packages/postgres packages/redis packages/supabase packages/dynamodb packages/server packages/streamyy",
     "lint": "npm run typecheck",
     "clean": "if (Test-Path dist) { Remove-Item -Recurse -Force dist }; Get-ChildItem packages -Directory | ForEach-Object { if (Test-Path (Join-Path $_.FullName 'dist')) { Remove-Item -Recurse -Force (Join-Path $_.FullName 'dist') } }"
   },
