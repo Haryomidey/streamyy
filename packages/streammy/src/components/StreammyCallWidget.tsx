@@ -1,4 +1,4 @@
-import { useMemo, useState, type ChangeEvent, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import { CallControls } from "./CallControls.js";
 import { IncomingCallCard } from "./IncomingCallCard.js";
 import { useRingtone } from "../hooks/useRingtone.js";
@@ -127,7 +127,7 @@ export const StreammyCallWidget = ({
             <span style={{ fontSize: "0.92rem", color: "rgba(226, 232, 240, 0.82)" }}>Receiver ID</span>
             <input
               value={receiverId}
-              onChange={(event: ChangeEvent<HTMLInputElement>) => setReceiverId(event.target.value)}
+              onChange={(event: { target: { value: string } }) => setReceiverId(event.target.value)}
               placeholder="user_456"
               style={{
                 borderRadius: "14px",
