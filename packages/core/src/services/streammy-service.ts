@@ -19,7 +19,7 @@ export class DefaultStreammyService implements StreammyService {
   private readonly now;
   private readonly idFactory;
   private readonly ringingTimeoutMs;
-  private readonly scheduler;
+  private readonly scheduler: NonNullable<StreammyCoreOptions["scheduler"]>;
   private readonly ringingTimers = new Map<string, unknown>();
 
   public constructor(private readonly options: StreammyCoreOptions) {
@@ -45,7 +45,7 @@ export class DefaultStreammyService implements StreammyService {
       deviceId: context.deviceId,
       connectedAt: timestamp,
       lastSeenAt: timestamp,
-      metadata: context.metadata,
+      ...(context.metadata ? { metadata: context.metadata } : {}),
     });
 
     await this.options.notifier.joinUserRoom?.(connection.connectionId, connection.userId);
@@ -77,7 +77,7 @@ export class DefaultStreammyService implements StreammyService {
       receiverId: input.receiverId,
       callType: input.callType,
       status: "initiated",
-      metadata: input.metadata,
+      ...(input.metadata ? { metadata: input.metadata } : {}),
     });
     const session = await this.updateCall(created.callId, {
       status: "ringing",
@@ -119,9 +119,9 @@ export class DefaultStreammyService implements StreammyService {
     await this.options.notifier.emitToUser(updated.callerId, STREAMMY_EVENTS.callAccept, {
       callId: updated.callId,
       acceptedBy: input.userId,
-      deviceId: input.deviceId,
       startedAt: updated.startedAt,
       status: updated.status,
+      ...(input.deviceId ? { deviceId: input.deviceId } : {}),
     });
 
     this.events.emit("call.updated", updated);
@@ -150,9 +150,9 @@ export class DefaultStreammyService implements StreammyService {
     await this.options.notifier.emitToUser(updated.callerId, STREAMMY_EVENTS.callDecline, {
       callId: updated.callId,
       declinedBy: input.userId,
-      deviceId: input.deviceId,
-      reason: input.reason,
       status: updated.status,
+      ...(input.deviceId ? { deviceId: input.deviceId } : {}),
+      ...(input.reason ? { reason: input.reason } : {}),
     });
 
     this.events.emit("call.updated", updated);
@@ -180,8 +180,8 @@ export class DefaultStreammyService implements StreammyService {
     await this.options.notifier.emitToUser(updated.receiverId, STREAMMY_EVENTS.callCancel, {
       callId: updated.callId,
       cancelledBy: input.userId,
-      deviceId: input.deviceId,
       status: updated.status,
+      ...(input.deviceId ? { deviceId: input.deviceId } : {}),
     });
 
     this.events.emit("call.updated", updated);
@@ -207,18 +207,18 @@ export class DefaultStreammyService implements StreammyService {
     const updated = await this.updateCall(input.callId, {
       status: "ended",
       endedAt,
-      duration,
       endedBy: input.userId,
+      ...(duration !== undefined ? { duration } : {}),
     });
 
     const counterpartId = updated.callerId === input.userId ? updated.receiverId : updated.callerId;
     await this.options.notifier.emitToUser(counterpartId, STREAMMY_EVENTS.callEnd, {
       callId: updated.callId,
       endedBy: input.userId,
-      deviceId: input.deviceId,
       status: updated.status,
       endedAt: updated.endedAt,
       duration: updated.duration,
+      ...(input.deviceId ? { deviceId: input.deviceId } : {}),
     });
 
     this.events.emit("call.ended", updated);
@@ -354,8 +354,8 @@ export class DefaultStreammyService implements StreammyService {
       userId,
       status: activeConnections > 0 ? "online" : "offline",
       lastSeenAt: this.now(),
-      metadata,
       activeConnections,
+      ...(metadata ? { metadata } : {}),
     });
 
     await this.options.notifier.emitToUser(userId, STREAMMY_EVENTS.presenceUpdate, presence);
