@@ -1,5 +1,5 @@
 {
-  "name": "@streammy/mongoose",
+  "name": "@streamyy/mongoose",
   "version": "0.1.0",
   "description": "Mongoose persistence adapter for Streamyy call sessions, presence, and connections.",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@streammy/core": "^0.1.0",
+    "@streamyy/core": "^0.1.0",
     "mongoose": "^8.18.0"
   }
 }

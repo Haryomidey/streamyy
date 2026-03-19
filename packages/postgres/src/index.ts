@@ -6,7 +6,7 @@ import type {
   SocketConnectionRepository,
   StreammyPersistenceAdapter,
   UserPresenceRepository,
-} from "@streammy/core";
+} from "@streamyy/core";
 
 export interface PostgresQueryClient {
   query<TResult = Record<string, unknown>>(

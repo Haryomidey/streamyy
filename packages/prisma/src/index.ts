@@ -6,7 +6,7 @@ import type {
   SocketConnectionRepository,
   StreammyPersistenceAdapter,
   UserPresenceRepository,
-} from "@streammy/core";
+} from "@streamyy/core";
 
 type WhereByKey<TKey extends string> = { where: Record<TKey, string> };
 

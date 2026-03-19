@@ -1,5 +1,5 @@
 import { Schema, type HydratedDocument, type Model, type Mongoose } from "mongoose";
-import type { SocketConnectionRecord } from "@streammy/core";
+import type { SocketConnectionRecord } from "@streamyy/core";
 
 export type SocketConnectionDocument = HydratedDocument<SocketConnectionRecord>;
 

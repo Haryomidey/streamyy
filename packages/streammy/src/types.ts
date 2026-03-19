@@ -1,4 +1,4 @@
-import type { CallSessionRecord, CallType, PresenceRecord } from "@streammy/core";
+import type { CallSessionRecord, CallType, PresenceRecord } from "@streamyy/core";
 
 export interface StreammyClientOptions {
   url: string;

@@ -1,4 +1,4 @@
-# @streammy/server
+# @streamyy/server
 
 Backend runtime package for Streamyy.
 
@@ -7,14 +7,14 @@ It provides the Socket.IO signaling transport, runtime bootstrap helpers, and li
 ## Install
 
 ```bash
-npm install @streammy/server socket.io
+npm install @streamyy/server socket.io
 ```
 
 ## Usage
 
 ```ts
 import { createServer } from "node:http";
-import { createStreammyRuntime } from "@streammy/server";
+import { createStreammyRuntime } from "@streamyy/server";
 
 const httpServer = createServer();
 

@@ -19,7 +19,7 @@ Important:
 
 ## Packages
 
-### `@streammy/core`
+### `@streamyy/core`
 
 Shared internal/backend package for:
 
@@ -29,7 +29,7 @@ Shared internal/backend package for:
 - persistence adapters
 - service lifecycle logic
 
-### `@streammy/mongoose`
+### `@streamyy/mongoose`
 
 Optional MongoDB/Mongoose adapter package for:
 
@@ -37,21 +37,21 @@ Optional MongoDB/Mongoose adapter package for:
 - Mongoose repositories
 - `createMongoosePersistenceAdapter(...)`
 
-### `@streammy/prisma`
+### `@streamyy/prisma`
 
 Optional Prisma adapter package for:
 
 - Prisma-backed repositories
 - `createPrismaPersistenceAdapter(...)`
 
-### `@streammy/postgres`
+### `@streamyy/postgres`
 
 Optional PostgreSQL adapter package for:
 
 - SQL-backed repositories
 - `createPostgresPersistenceAdapter(...)`
 
-### `@streammy/redis`
+### `@streamyy/redis`
 
 Optional Redis adapter package for:
 
@@ -59,14 +59,14 @@ Optional Redis adapter package for:
 - fast presence and connection tracking
 - `createRedisPersistenceAdapter(...)`
 
-### `@streammy/supabase`
+### `@streamyy/supabase`
 
 Optional Supabase adapter package for:
 
 - Supabase table-backed repositories
 - `createSupabasePersistenceAdapter(...)`
 
-### `@streammy/dynamodb`
+### `@streamyy/dynamodb`
 
 Optional DynamoDB adapter package for:
 
@@ -78,13 +78,13 @@ Optional DynamoDB adapter package for:
 Right now Streamyy supports:
 
 - in-memory storage out of the box
-- MongoDB through `@streammy/mongoose`
-- Prisma through `@streammy/prisma`
-- PostgreSQL through `@streammy/postgres`
-- Redis through `@streammy/redis`
-- Supabase through `@streammy/supabase`
-- DynamoDB through `@streammy/dynamodb`
-- custom adapters through the repository interfaces in `@streammy/core`
+- MongoDB through `@streamyy/mongoose`
+- Prisma through `@streamyy/prisma`
+- PostgreSQL through `@streamyy/postgres`
+- Redis through `@streamyy/redis`
+- Supabase through `@streamyy/supabase`
+- DynamoDB through `@streamyy/dynamodb`
+- custom adapters through the repository interfaces in `@streamyy/core`
 
 That means you can support:
 
@@ -98,16 +98,16 @@ That means you can support:
 
 Official adapter packages in this workspace:
 
-- `@streammy/mongoose`
-- `@streammy/prisma`
-- `@streammy/postgres`
-- `@streammy/redis`
-- `@streammy/supabase`
-- `@streammy/dynamodb`
+- `@streamyy/mongoose`
+- `@streamyy/prisma`
+- `@streamyy/postgres`
+- `@streamyy/redis`
+- `@streamyy/supabase`
+- `@streamyy/dynamodb`
 
 Each adapter package now includes its own README and, where relevant, ready-to-copy schema examples.
 
-### `@streammy/server`
+### `@streamyy/server`
 
 Backend package developers install.
 
@@ -141,7 +141,7 @@ Use it when you want:
 Install:
 
 ```bash
-npm install @streammy/server
+npm install @streamyy/server
 ```
 
 What they get:
@@ -179,7 +179,7 @@ This is the main backend entry point.
 ```ts
 import { createServer } from "node:http";
 import express from "express";
-import { createStreammyServer, registerExpressStreammyRoutes } from "@streammy/server";
+import { createStreammyServer, registerExpressStreammyRoutes } from "@streamyy/server";
 
 const app = express();
 app.use(express.json());
@@ -238,8 +238,8 @@ If you want call history, presence persistence, and socket connection persistenc
 import mongoose from "mongoose";
 import { createServer } from "node:http";
 import express from "express";
-import { createMongoosePersistenceAdapter } from "@streammy/mongoose";
-import { createStreammyServer } from "@streammy/server";
+import { createMongoosePersistenceAdapter } from "@streamyy/mongoose";
+import { createStreammyServer } from "@streamyy/server";
 
 await mongoose.connect(process.env.MONGODB_URI!);
 
@@ -254,19 +254,19 @@ const streammy = createStreammyServer({
 
 This means:
 
-- `@streammy/server` is storage-agnostic
+- `@streamyy/server` is storage-agnostic
 - Mongoose is optional
 - you can later add other adapters like Prisma, PostgreSQL, Redis, or your own custom repositories
 
 Install for this option:
 
 ```bash
-npm install @streammy/server @streammy/mongoose mongoose
+npm install @streamyy/server @streamyy/mongoose mongoose
 ```
 
 ## 1b. Use your own persistence adapter
 
-If your app uses another database, implement the repository interfaces from `@streammy/core` and pass them into the server runtime.
+If your app uses another database, implement the repository interfaces from `@streamyy/core` and pass them into the server runtime.
 
 ```ts
 import {
@@ -274,8 +274,8 @@ import {
   type CallSessionRepository,
   type SocketConnectionRepository,
   type UserPresenceRepository,
-} from "@streammy/core";
-import { createStreammyServer } from "@streammy/server";
+} from "@streamyy/core";
+import { createStreammyServer } from "@streamyy/server";
 
 const sessions: CallSessionRepository = {
   async create(session) {
@@ -371,13 +371,13 @@ That can be useful when:
 Install:
 
 ```bash
-npm install @streammy/server @streammy/prisma
+npm install @streamyy/server @streamyy/prisma
 ```
 
 Usage:
 
 ```ts
-import { createPrismaPersistenceAdapter } from "@streammy/prisma";
+import { createPrismaPersistenceAdapter } from "@streamyy/prisma";
 
 const persistence = createPrismaPersistenceAdapter({
   callSession: prisma.callSession,
@@ -396,14 +396,14 @@ const streammy = createStreammyServer({
 Install:
 
 ```bash
-npm install @streammy/server @streammy/postgres pg
+npm install @streamyy/server @streamyy/postgres pg
 ```
 
 Usage:
 
 ```ts
 import { Pool } from "pg";
-import { createPostgresPersistenceAdapter } from "@streammy/postgres";
+import { createPostgresPersistenceAdapter } from "@streamyy/postgres";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
@@ -417,14 +417,14 @@ const persistence = createPostgresPersistenceAdapter({
 Install:
 
 ```bash
-npm install @streammy/server @streammy/redis redis
+npm install @streamyy/server @streamyy/redis redis
 ```
 
 Usage:
 
 ```ts
 import { createClient } from "redis";
-import { createRedisPersistenceAdapter } from "@streammy/redis";
+import { createRedisPersistenceAdapter } from "@streamyy/redis";
 
 const redis = createClient({ url: process.env.REDIS_URL });
 await redis.connect();
@@ -439,14 +439,14 @@ const persistence = createRedisPersistenceAdapter({
 Install:
 
 ```bash
-npm install @streammy/server @streammy/supabase @supabase/supabase-js
+npm install @streamyy/server @streamyy/supabase @supabase/supabase-js
 ```
 
 Usage:
 
 ```ts
 import { createClient } from "@supabase/supabase-js";
-import { createSupabasePersistenceAdapter } from "@streammy/supabase";
+import { createSupabasePersistenceAdapter } from "@streamyy/supabase";
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 
@@ -462,13 +462,13 @@ const persistence = createSupabasePersistenceAdapter({
 Install:
 
 ```bash
-npm install @streammy/server @streammy/dynamodb @aws-sdk/lib-dynamodb
+npm install @streamyy/server @streamyy/dynamodb @aws-sdk/lib-dynamodb
 ```
 
 Usage:
 
 ```ts
-import { createDynamoDbPersistenceAdapter } from "@streammy/dynamodb";
+import { createDynamoDbPersistenceAdapter } from "@streamyy/dynamodb";
 
 const persistence = createDynamoDbPersistenceAdapter({
   client: dynamoDocumentClient,
@@ -481,7 +481,7 @@ If your backend uses Express:
 
 ```ts
 import express from "express";
-import { registerExpressStreammyRoutes } from "@streammy/server";
+import { registerExpressStreammyRoutes } from "@streamyy/server";
 
 const app = express();
 app.use(express.json());
@@ -532,7 +532,7 @@ If your backend uses Fastify:
 
 ```ts
 import Fastify from "fastify";
-import { registerFastifyStreammyRoutes } from "@streammy/server";
+import { registerFastifyStreammyRoutes } from "@streamyy/server";
 
 const app = Fastify();
 
@@ -547,7 +547,7 @@ registerFastifyStreammyRoutes(app, {
 If you want Nest-style module registration:
 
 ```ts
-import { StreammyModule } from "@streammy/server";
+import { StreammyModule } from "@streamyy/server";
 
 const streammyModule = StreammyModule.forRoot({
   global: true,

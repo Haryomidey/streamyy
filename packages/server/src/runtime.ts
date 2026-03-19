@@ -4,7 +4,7 @@ import {
   type StreammyAuthHandler,
   type StreammyPersistenceAdapter,
   type StreammyService,
-} from "@streammy/core";
+} from "@streamyy/core";
 import { Server as SocketIoServer, type ServerOptions as SocketIoServerOptions } from "socket.io";
 import { SocketIoNotifier, bindSocketIoServer } from "./transport/socket-io.js";
 import type { SocketIoLikeServer } from "./types.js";

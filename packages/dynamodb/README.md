@@ -1,19 +1,19 @@
-# @streammy/dynamodb
+# @streamyy/dynamodb
 
 DynamoDB persistence adapter for Streamyy.
 
 ## Install
 
 ```bash
-npm install @streammy/server @streammy/dynamodb @aws-sdk/lib-dynamodb
+npm install @streamyy/server @streamyy/dynamodb @aws-sdk/lib-dynamodb
 ```
 
 ## Usage
 
 ```ts
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
-import { createDynamoDbPersistenceAdapter } from "@streammy/dynamodb";
-import { createStreammyServer } from "@streammy/server";
+import { createDynamoDbPersistenceAdapter } from "@streamyy/dynamodb";
+import { createStreammyServer } from "@streamyy/server";
 
 const dynamo = DynamoDBDocumentClient.from(baseClient);
 

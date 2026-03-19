@@ -6,7 +6,7 @@ import type {
   SocketConnectionRepository,
   StreammyPersistenceAdapter,
   UserPresenceRepository,
-} from "@streammy/core";
+} from "@streamyy/core";
 
 export interface SupabaseTableClient<TRecord> {
   insert(values: TRecord): Promise<{ data: TRecord | null; error: unknown | null }>;

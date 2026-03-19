@@ -1,5 +1,5 @@
 import type { Mongoose } from "mongoose";
-import type { StreammyPersistenceAdapter } from "@streammy/core";
+import type { StreammyPersistenceAdapter } from "@streamyy/core";
 import { createStreammyModels } from "../models/index.js";
 import {
   MongooseCallSessionRepository,

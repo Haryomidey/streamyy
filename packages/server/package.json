@@ -1,5 +1,5 @@
 {
-  "name": "@streammy/server",
+  "name": "@streamyy/server",
   "version": "0.1.0",
   "description": "Socket.IO runtime and framework adapters for Streamyy signaling backends.",
   "license": "MIT",
@@ -28,7 +28,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@streammy/core": "^0.1.0",
+    "@streamyy/core": "^0.1.0",
     "socket.io": "^4.8.1"
   },
   "peerDependencies": {

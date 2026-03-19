@@ -1,4 +1,4 @@
-import { StreammyError, STREAMMY_EVENTS, type StreammyAuthResult } from "@streammy/core";
+import { StreammyError, STREAMMY_EVENTS, type StreammyAuthResult } from "@streamyy/core";
 import type { SocketIoLikeSocket, StreammySocketServerOptions } from "../types.js";
 
 const userRoom = (userId: string): string => `streammy:user:${userId}`;

@@ -7,7 +7,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
-import type { CallStatus, CallType } from "@streammy/core";
+import type { CallStatus, CallType } from "@streamyy/core";
 import { createStreammyClient, type StreammyClient } from "../client.js";
 import type { StreammyActiveCall, StreammyClientOptions } from "../types.js";
 

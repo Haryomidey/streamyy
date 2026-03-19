@@ -3,7 +3,7 @@ import {
   type CallSessionRecord,
   type CallType,
   type PresenceRecord,
-} from "@streammy/core";
+} from "@streamyy/core";
 import { io, type Socket } from "socket.io-client";
 import type {
   StreammyCallAccepted,

@@ -1,11 +1,11 @@
-# @streammy/mongoose
+# @streamyy/mongoose
 
 MongoDB/Mongoose persistence adapter for Streamyy.
 
 ## Install
 
 ```bash
-npm install @streammy/server @streammy/mongoose mongoose
+npm install @streamyy/server @streamyy/mongoose mongoose
 ```
 
 ## Usage
@@ -13,8 +13,8 @@ npm install @streammy/server @streammy/mongoose mongoose
 ```ts
 import mongoose from "mongoose";
 import { createServer } from "node:http";
-import { createMongoosePersistenceAdapter } from "@streammy/mongoose";
-import { createStreammyServer } from "@streammy/server";
+import { createMongoosePersistenceAdapter } from "@streamyy/mongoose";
+import { createStreammyServer } from "@streamyy/server";
 
 await mongoose.connect(process.env.MONGODB_URI!);
 

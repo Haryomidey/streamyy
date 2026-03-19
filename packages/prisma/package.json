@@ -1,5 +1,5 @@
 {
-  "name": "@streammy/prisma",
+  "name": "@streamyy/prisma",
   "version": "0.1.0",
   "description": "Prisma persistence adapter for Streamyy call sessions, presence, and connections.",
   "license": "MIT",
@@ -28,6 +28,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@streammy/core": "^0.1.0"
+    "@streamyy/core": "^0.1.0"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@streammy/core",
+  "name": "@streamyy/core",
   "version": "0.1.0",
   "description": "Core domain types, events, repositories, and call lifecycle services for Streamyy.",
   "license": "MIT",

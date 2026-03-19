@@ -7,7 +7,7 @@
     "composite": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
-      "@streammy/core": [
+      "@streamyy/core": [
         "../core/src/index.ts"
       ]
     }

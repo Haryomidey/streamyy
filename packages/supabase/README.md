@@ -1,19 +1,19 @@
-# @streammy/supabase
+# @streamyy/supabase
 
 Supabase persistence adapter for Streamyy.
 
 ## Install
 
 ```bash
-npm install @streammy/server @streammy/supabase @supabase/supabase-js
+npm install @streamyy/server @streamyy/supabase @supabase/supabase-js
 ```
 
 ## Usage
 
 ```ts
 import { createClient } from "@supabase/supabase-js";
-import { createSupabasePersistenceAdapter } from "@streammy/supabase";
-import { createStreammyServer } from "@streammy/server";
+import { createSupabasePersistenceAdapter } from "@streamyy/supabase";
+import { createStreammyServer } from "@streamyy/server";
 
 const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_KEY!);
 

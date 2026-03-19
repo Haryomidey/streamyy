@@ -1,18 +1,18 @@
-# @streammy/prisma
+# @streamyy/prisma
 
 Prisma persistence adapter for Streamyy.
 
 ## Install
 
 ```bash
-npm install @streammy/server @streammy/prisma
+npm install @streamyy/server @streamyy/prisma
 ```
 
 ## Usage
 
 ```ts
-import { createPrismaPersistenceAdapter } from "@streammy/prisma";
-import { createStreammyServer } from "@streammy/server";
+import { createPrismaPersistenceAdapter } from "@streamyy/prisma";
+import { createStreammyServer } from "@streamyy/server";
 
 const streammy = createStreammyServer({
   httpServer,

@@ -6,7 +6,7 @@ import type {
   SocketConnectionRepository,
   StreammyPersistenceAdapter,
   UserPresenceRepository,
-} from "@streammy/core";
+} from "@streamyy/core";
 
 export interface DynamoDbLikeClient {
   put<TItem>(params: { tableName: string; item: TItem }): Promise<void>;

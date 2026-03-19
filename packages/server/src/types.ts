@@ -4,7 +4,7 @@ import type {
   StreammyAuthHandler,
   StreammyNotifier,
   StreammyService,
-} from "@streammy/core";
+} from "@streamyy/core";
 
 export interface SocketIoLikeSocket {
   id: string;

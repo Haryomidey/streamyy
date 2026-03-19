@@ -1,4 +1,4 @@
-# @streammy/core
+# @streamyy/core
 
 Core domain package for Streamyy.
 
@@ -7,7 +7,7 @@ It contains the shared call types, signaling events, repository interfaces, in-m
 ## Install
 
 ```bash
-npm install @streammy/core
+npm install @streamyy/core
 ```
 
 ## Includes
@@ -21,7 +21,7 @@ npm install @streammy/core
 ## Usage
 
 ```ts
-import { createInMemoryPersistenceAdapter, createStreammyService } from "@streammy/core";
+import { createInMemoryPersistenceAdapter, createStreammyService } from "@streamyy/core";
 
 const persistence = createInMemoryPersistenceAdapter();
 

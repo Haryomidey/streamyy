@@ -6,7 +6,7 @@ import type {
   SocketConnectionRecord,
   SocketConnectionRepository,
   UserPresenceRepository,
-} from "@streammy/core";
+} from "@streamyy/core";
 
 export class MongooseCallSessionRepository implements CallSessionRepository {
   public constructor(private readonly model: Model<CallSessionRecord>) {}
