@@ -1,9 +1,20 @@
 {
   "name": "@streammy/supabase",
   "version": "0.1.0",
+  "description": "Supabase persistence adapter for Streamyy call sessions, presence, and connections.",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/streamyy.git",
+    "directory": "packages/supabase"
+  },
+  "homepage": "https://github.com/your-org/streamyy#readme",
+  "bugs": {
+    "url": "https://github.com/your-org/streamyy/issues"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,6 +24,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@streammy/core": "^0.1.0"
   }
