@@ -134,6 +134,17 @@ Use it when you want:
 - reconnect-aware connection state
 - WebRTC helpers
 
+### `streamyy`
+
+CLI package developers can use to scaffold starter apps.
+
+Use it when you want:
+
+- `npx streamyy init` to generate backend and frontend starters
+- `npx streamyy init --backend` for backend only
+- `npx streamyy init --frontend` for frontend only
+- `npx streamyy init --frontend --custom` for a hook-based custom frontend starter
+
 ## Who Installs What
 
 ### Backend developer
@@ -189,6 +200,10 @@ const httpServer = createServer(app);
 const streammy = createStreammyServer({
   httpServer,
   ringingTimeoutMs: 60_000,
+  rateLimit: {
+    connectionAttempts: { max: 20, windowMs: 60_000 },
+    callInitiation: { max: 8, windowMs: 60_000 },
+  },
   socket: {
     cors: {
       origin: "*",
@@ -226,9 +241,26 @@ What this does:
 - creates the Socket.IO server internally
 - binds Socket.IO events internally
 - handles authentication
+- can rate-limit connection attempts and call initiation
 - enables ringing timeout
 - exposes optional HTTP routes
 - uses in-memory storage by default unless you pass a persistence adapter
+
+## 1b. Scaffold an app with the CLI
+
+```bash
+npx streamyy init
+```
+
+Or generate a single starter:
+
+```bash
+npx streamyy init --backend
+npx streamyy init --frontend
+npx streamyy init --frontend --custom
+```
+
+The CLI creates `streamyy-backend` and/or `streamyy-frontend` directories in your current folder.
 
 ## 1a. Use MongoDB/Mongoose if you want persistent storage
 
@@ -719,6 +751,10 @@ client.on("callAccepted", (payload) => {
 
 client.on("callEnded", (payload) => {
   console.log("Ended", payload.status, payload.reason);
+});
+
+client.on("error", (payload) => {
+  console.error(payload.code, payload.message);
 });
 
 client.initiateCall("user_456", "audio", {

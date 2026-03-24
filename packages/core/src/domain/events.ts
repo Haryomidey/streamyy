@@ -11,6 +11,7 @@ export const STREAMMY_EVENTS = {
   callAnswer: "call:answer",
   callIceCandidate: "call:ice-candidate",
   presenceUpdate: "presence:update",
+  error: "streammy:error",
 } as const;
 
 export type StreammySocketEvent = (typeof STREAMMY_EVENTS)[keyof typeof STREAMMY_EVENTS];

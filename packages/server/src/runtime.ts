@@ -7,6 +7,7 @@ import {
 } from "@streamyy/core";
 import { Server as SocketIoServer, type ServerOptions as SocketIoServerOptions } from "socket.io";
 import { SocketIoNotifier, bindSocketIoServer } from "./transport/socket-io.js";
+import type { StreammyRateLimitOptions } from "./rate-limit.js";
 import type { SocketIoLikeServer } from "./types.js";
 
 export interface CreateStreammyRuntimeOptions {
@@ -15,6 +16,7 @@ export interface CreateStreammyRuntimeOptions {
   ringingTimeoutMs?: number;
   socket?: Partial<SocketIoServerOptions>;
   persistence?: StreammyPersistenceAdapter;
+  rateLimit?: StreammyRateLimitOptions;
 }
 
 export interface StreammyRuntime {
@@ -45,6 +47,7 @@ export const createStreammyRuntime = (options: CreateStreammyRuntimeOptions): St
         io,
         service,
         ...(options.auth ? { auth: options.auth } : {}),
+        ...(options.rateLimit ? { rateLimit: options.rateLimit } : {}),
       });
     },
   };

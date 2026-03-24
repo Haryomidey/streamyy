@@ -1,4 +1,5 @@
 import { StreammyError, STREAMMY_EVENTS, type StreammyAuthResult } from "@streamyy/core";
+import { InMemoryStreammyRateLimiter } from "../rate-limit.js";
 import type { SocketIoLikeSocket, StreammySocketServerOptions } from "../types.js";
 
 const userRoom = (userId: string): string => `streammy:user:${userId}`;
@@ -25,6 +26,23 @@ const readAuthToken = (socket: SocketIoLikeSocket): string | undefined => {
 
   const headerToken = socket.handshake.headers?.authorization;
   return typeof headerToken === "string" ? headerToken.replace(/^Bearer\s+/i, "") : undefined;
+};
+
+const readSocketIp = (socket: SocketIoLikeSocket): string | undefined => {
+  const forwardedFor = socket.handshake.headers?.["x-forwarded-for"];
+  if (typeof forwardedFor === "string" && forwardedFor.length > 0) {
+    return forwardedFor.split(",")[0]?.trim();
+  }
+
+  return socket.handshake.address;
+};
+
+const emitSocketError = (socket: SocketIoLikeSocket, error: unknown): void => {
+  const payload =
+    error instanceof StreammyError
+      ? { code: error.code, message: error.message }
+      : { code: "INTERNAL_ERROR", message: error instanceof Error ? error.message : "Unexpected error" };
+  socket.emit(STREAMMY_EVENTS.error, payload);
 };
 
 export class SocketIoNotifier {
@@ -83,9 +101,15 @@ const applyAuth = async (
 };
 
 export const bindSocketIoServer = (options: StreammySocketServerOptions): void => {
+  const rateLimiter = options.rateLimit ? new InMemoryStreammyRateLimiter(options.rateLimit) : null;
+
   options.io.use(async (socket, next) => {
     try {
       const auth = await applyAuth(socket, options.auth);
+      rateLimiter?.assertConnectionAllowed({
+        userId: auth.userId,
+        ip: readSocketIp(socket),
+      });
       socket.data.streammy = auth;
       next();
     } catch (error) {
@@ -95,6 +119,10 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
 
   options.io.on("connection", (socket) => {
     const auth = socket.data.streammy as StreammyAuthResult;
+    const rateLimitContext = {
+      userId: auth.userId,
+      ip: readSocketIp(socket),
+    };
     void socket.join(userRoom(auth.userId));
     void options.service.connect(
       withOptionalMetadata(
@@ -112,12 +140,19 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
     });
 
     socket.on(STREAMMY_EVENTS.callInitiate, (payload) => {
-      void options.service.initiateCall({
-        callerId: auth.userId,
-        receiverId: String(payload.receiverId),
-        callType: payload.callType === "video" ? "video" : "audio",
-        ...(payload.metadata !== undefined ? { metadata: payload.metadata as Record<string, unknown> } : {}),
-      });
+      try {
+        rateLimiter?.assertCallInitiationAllowed(rateLimitContext);
+        void options.service.initiateCall({
+          callerId: auth.userId,
+          receiverId: String(payload.receiverId),
+          callType: payload.callType === "video" ? "video" : "audio",
+          ...(payload.metadata !== undefined ? { metadata: payload.metadata as Record<string, unknown> } : {}),
+        }).catch((error) => {
+          emitSocketError(socket, error);
+        });
+      } catch (error) {
+        emitSocketError(socket, error);
+      }
     });
 
     socket.on(STREAMMY_EVENTS.callAccept, (payload) => {
@@ -125,6 +160,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         callId: String(payload.callId),
         userId: auth.userId,
         deviceId: auth.deviceId,
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
 
@@ -134,6 +171,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         userId: auth.userId,
         deviceId: auth.deviceId,
         ...(typeof payload.reason === "string" ? { reason: payload.reason } : {}),
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
 
@@ -142,6 +181,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         callId: String(payload.callId),
         userId: auth.userId,
         deviceId: auth.deviceId,
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
 
@@ -150,6 +191,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         callId: String(payload.callId),
         userId: auth.userId,
         deviceId: auth.deviceId,
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
 
@@ -159,6 +202,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         fromUserId: auth.userId,
         targetUserId: String(payload.targetUserId),
         payload: payload.payload,
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
 
@@ -168,6 +213,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         fromUserId: auth.userId,
         targetUserId: String(payload.targetUserId),
         payload: payload.payload,
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
 
@@ -177,6 +224,8 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
         fromUserId: auth.userId,
         targetUserId: String(payload.targetUserId),
         payload: payload.payload,
+      }).catch((error) => {
+        emitSocketError(socket, error);
       });
     });
   });

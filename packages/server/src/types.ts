@@ -5,6 +5,7 @@ import type {
   StreammyNotifier,
   StreammyService,
 } from "@streamyy/core";
+import type { StreammyRateLimitOptions } from "./rate-limit.js";
 
 export interface SocketIoLikeSocket {
   id: string;
@@ -12,6 +13,7 @@ export interface SocketIoLikeSocket {
     auth?: Record<string, unknown>;
     headers?: Record<string, unknown>;
     query?: Record<string, unknown>;
+    address?: string;
   };
   data: Record<string, unknown>;
   join(room: string): Promise<void> | void;
@@ -37,6 +39,7 @@ export interface StreammySocketServerOptions {
   io: SocketIoLikeServer;
   service: StreammyService;
   auth?: StreammyAuthHandler;
+  rateLimit?: StreammyRateLimitOptions;
 }
 
 export interface CreateManagedSocketServerOptions {
@@ -48,6 +51,7 @@ export interface StreammyServerRuntimeOptions {
   service: StreammyService;
   notifier: StreammyNotifier;
   auth?: StreammyAuthHandler;
+  rateLimit?: StreammyRateLimitOptions;
 }
 
 export interface ExpressLikeRequest {

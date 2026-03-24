@@ -1,15 +1,18 @@
 {
-  "name": "@streamyy/client",
-  "version": "0.4.0",
-  "description": "Frontend client, React hooks, UI components, and WebRTC helpers for Streamyy.",
+  "name": "streamyy",
+  "version": "0.1.0",
+  "description": "CLI for scaffolding Streamyy backend and frontend apps.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "streamyy": "./dist/index.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Haryomidey/streamyy.git",
-    "directory": "packages/streamyy"
+    "directory": "packages/cli"
   },
   "homepage": "https://github.com/Haryomidey/streamyy#readme",
   "bugs": {
@@ -26,14 +29,5 @@
   ],
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@streamyy/core": "^0.1.0",
-    "react": "^19.0.0",
-    "socket.io-client": "^4.8.1"
-  },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
   }
 }

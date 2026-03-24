@@ -43,6 +43,11 @@ export interface StreamyyCallEnded {
   reason?: string;
 }
 
+export interface StreamyyErrorEvent {
+  code: string;
+  message: string;
+}
+
 export interface StreamyySimpleCallEvent {
   callId: string;
   deviceId?: string;
@@ -67,6 +72,7 @@ export interface StreamyyClientEvents {
   callDeclined: StreamyySimpleCallEvent;
   callCancelled: StreamyySimpleCallEvent;
   callEnded: StreamyyCallEnded;
+  error: StreamyyErrorEvent;
   offer: StreamyySignalEvent;
   answer: StreamyySignalEvent;
   iceCandidate: StreamyySignalEvent;

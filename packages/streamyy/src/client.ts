@@ -121,6 +121,7 @@ export class StreamyyClient {
     this.socket.on(STREAMMY_EVENTS.callEnd, (payload: StreamyyCallEnded) =>
       this.emit("callEnded", payload),
     );
+    this.socket.on(STREAMMY_EVENTS.error, (payload) => this.emit("error", payload));
     this.socket.on(STREAMMY_EVENTS.callOffer, (payload: StreamyySignalEvent) =>
       this.emit("offer", payload),
     );

@@ -37,6 +37,7 @@ export function App() {
 - default calling widget
 - start-audio and start-video hook actions for custom buttons
 - customizable incoming-call and active-call screens
+- typed `error` event for transport and rate-limit failures
 - ringtone helpers
 - video layout helpers
 - WebRTC peer session helpers
