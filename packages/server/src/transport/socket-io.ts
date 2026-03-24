@@ -45,6 +45,14 @@ const emitSocketError = (socket: SocketIoLikeSocket, error: unknown): void => {
   socket.emit(STREAMMY_EVENTS.error, payload);
 };
 
+const createRateLimitContext = (socket: SocketIoLikeSocket, userId: string) => {
+  const ip = readSocketIp(socket);
+  return {
+    userId,
+    ...(ip ? { ip } : {}),
+  };
+};
+
 export class SocketIoNotifier {
   public constructor(private readonly io: StreammySocketServerOptions["io"]) {}
 
@@ -106,10 +114,7 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
   options.io.use(async (socket, next) => {
     try {
       const auth = await applyAuth(socket, options.auth);
-      rateLimiter?.assertConnectionAllowed({
-        userId: auth.userId,
-        ip: readSocketIp(socket),
-      });
+      rateLimiter?.assertConnectionAllowed(createRateLimitContext(socket, auth.userId));
       socket.data.streammy = auth;
       next();
     } catch (error) {
@@ -119,10 +124,7 @@ export const bindSocketIoServer = (options: StreammySocketServerOptions): void =
 
   options.io.on("connection", (socket) => {
     const auth = socket.data.streammy as StreammyAuthResult;
-    const rateLimitContext = {
-      userId: auth.userId,
-      ip: readSocketIp(socket),
-    };
+    const rateLimitContext = createRateLimitContext(socket, auth.userId);
     void socket.join(userRoom(auth.userId));
     void options.service.connect(
       withOptionalMetadata(

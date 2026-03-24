@@ -36,6 +36,7 @@ const parseArgs = (argv: string[]): ParsedArgs => {
   const hasBackend = argv.includes("--backend");
   const hasFrontend = argv.includes("--frontend");
   const custom = argv.includes("--custom");
+  const target: InitTarget = hasBackend ? "backend" : hasFrontend ? "frontend" : "both";
 
   if (hasBackend && hasFrontend) {
     throw new Error("Use either --backend or --frontend, or omit both to generate both starters.");
@@ -46,8 +47,8 @@ const parseArgs = (argv: string[]): ParsedArgs => {
   }
 
   return {
-    command,
-    target: hasBackend ? "backend" : hasFrontend ? "frontend" : "both",
+    ...(command ? { command } : {}),
+    target,
     custom,
   };
 };
@@ -72,7 +73,7 @@ const backendFiles = (): TemplateFile[] => [
       dependencies: {
         "@streamyy/server": "^0.1.0",
         express: "^4.21.2",
-        socket.io: "^4.8.1",
+        "socket.io": "^4.8.1",
       },
     }),
   },
