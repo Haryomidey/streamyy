@@ -6,8 +6,16 @@ declare module "mongoose" {
     exec(): Promise<TResult>;
   }
 
-  export interface Model<T> {
-    create(input: T): Promise<HydratedDocument<T>>;
+  export interface Model<
+    TRawDocType,
+    TQueryHelpers = {},
+    TInstanceMethods = {},
+    TVirtuals = {},
+    THydratedDocumentType = HydratedDocument<TRawDocType>,
+    TSchema = Schema<TRawDocType>,
+    T = TRawDocType,
+  > {
+    create(input: T): Promise<THydratedDocumentType>;
     findOne(filter: Record<string, unknown>): QueryLike<T | null>;
     findOneAndUpdate(
       filter: Record<string, unknown>,
@@ -20,7 +28,7 @@ declare module "mongoose" {
   }
 
   export interface Mongoose {
-    models: Record<string, Model<any> | undefined>;
+    models: Record<string, Model<any, any, any, any, any, any, any> | undefined>;
     model<T>(name: string, schema: Schema<T>): Model<T>;
   }
 

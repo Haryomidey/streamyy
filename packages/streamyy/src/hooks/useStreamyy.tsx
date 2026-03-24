@@ -76,7 +76,10 @@ export const StreamyyProvider = ({
 }: PropsWithChildren<{ options: StreamyyClientOptions }>) => {
   const clientRef = useRef<StreamyyClient | null>(null);
   if (!clientRef.current) {
-    clientRef.current = createStreamyyClient(options);
+    clientRef.current = createStreamyyClient({
+      ...options,
+      autoConnect: false,
+    });
   }
 
   const client = clientRef.current;
@@ -307,6 +310,8 @@ export const StreamyyProvider = ({
   };
 
   useEffect(() => {
+    client.connect();
+
     const unsubscribers = [
       client.on("connected", () => {
         setConnected(true);
@@ -487,6 +492,7 @@ export const StreamyyProvider = ({
         unsubscribe();
       }
       resetCallArtifacts();
+      client.disconnect();
     };
   }, [client, options.userId]);
 

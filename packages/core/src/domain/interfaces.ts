@@ -1,4 +1,3 @@
-import type { EventEmitter } from "node:events";
 import type {
   CallSessionRecord,
   ConnectionContext,
@@ -69,13 +68,13 @@ export interface StreammyCoreOptions {
   };
 }
 
-export type TypedEventBus = EventEmitter & {
+export interface TypedEventBus {
   emit<TKey extends keyof StreammyCoreEvents>(event: TKey, payload: StreammyCoreEvents[TKey]): boolean;
   on<TKey extends keyof StreammyCoreEvents>(
     event: TKey,
     listener: (payload: StreammyCoreEvents[TKey]) => void,
   ): TypedEventBus;
-};
+}
 
 export interface StreammyService {
   connect(context: ConnectionContext): Promise<SocketConnectionRecord>;
