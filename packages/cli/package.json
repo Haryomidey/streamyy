@@ -1,6 +1,6 @@
 {
-  "name": "streamyy",
-  "version": "0.1.0",
+  "name": "@streamyy/cli",
+  "version": "0.1.1",
   "description": "CLI for scaffolding Streamyy backend and frontend apps.",
   "license": "MIT",
   "type": "module",

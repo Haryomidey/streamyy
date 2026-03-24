@@ -1,14 +1,14 @@
-# streamyy
+# @streamyy/cli
 
 CLI package for scaffolding Streamyy starters.
 
 ## Usage
 
 ```bash
-npx streamyy init
-npx streamyy init --backend
-npx streamyy init --frontend
-npx streamyy init --frontend --custom
+npx @streamyy/cli init
+npx @streamyy/cli init --backend
+npx @streamyy/cli init --frontend
+npx @streamyy/cli init --frontend --custom
 ```
 
 ## Output
